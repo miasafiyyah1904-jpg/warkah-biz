@@ -62,13 +62,6 @@ export default function SettingsPanel({ open, onClose, profileName, businessName
     }
   };
 
-  const langs = [
-    { code: "ms", flag: "🇲🇾", native: t("langNativeMs"), alias: t("langAliasMs") },
-    { code: "en", flag: "🇬🇧", native: t("langNativeEn"), alias: t("langAliasEn") },
-    { code: "zh", flag: "🇨🇳", native: t("langNativeZh"), alias: t("langAliasZh") },
-    { code: "ta", flag: "🇮🇳", native: t("langNativeTa"), alias: t("langAliasTa") },
-  ];
-
   return (
     <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true">
       <button type="button" className="absolute inset-0 bg-black/50 tap" aria-label={t("no")} onClick={onClose} />
