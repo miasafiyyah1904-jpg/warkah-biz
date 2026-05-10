@@ -18,7 +18,7 @@
  *  ✅ saved_cards   (TNG + Maybank)
  *  ✅ business_hours
  *  ✅ outlet_settings
- *  ✅ sisa_harian   (60 days waste tracker — device_id = userId)
+ *  ✅ sisa_harian   (60 days waste tracker — user_id = userId)
  *  ✅ user_impian   (2 goals, 53% + 15% funded)
  *  ✅ nightly_reports (60 days pre-generated with AI fields)
  *  ✅ action_items_log (linked to nightly reports)
@@ -554,7 +554,7 @@ function generateSisaHarian(userId: string) {
       const sold = prepared - leftover;
 
       rows.push({
-        device_id: userId,
+        user_id: userId,
         product_id: p.id, product_name: p.name,
         log_date: isoDate(day),
         prepared_qty: prepared, sold_qty: sold, leftover_qty: leftover,
@@ -629,7 +629,7 @@ function generateNightlyReports(userId: string) {
     const reportDate = isoDate(day);
 
     reports.push({
-      device_id: userId,
+      user_id: userId,
       business_name: "Gerai Nasi Lemak Pak Arif",
       report_date: reportDate,
       total_sales: totalSales,
@@ -683,7 +683,7 @@ function buildActionItems(userId: string, reportIdByDate: Record<string, string>
     const report_id = reportIdByDate[date];
     if (!report_id) return; // skip if no matching report
     items.push({
-      device_id: userId,
+      user_id: userId,
       report_id,
       report_date: date,
       action_text: a.text,
@@ -711,7 +711,7 @@ function generateForecasts(userId: string) {
     const accuracy = Math.round(100 - (Math.abs(actual - predicted) / predicted) * 100);
 
     rows.push({
-      device_id: userId,
+      user_id: userId,
       forecast_date: isoDate(day),
       day_index: dayIndex,
       baseline: base,
@@ -778,13 +778,13 @@ function generateChatHistory(userId: string) {
 function generateImpian(userId: string) {
   return [
     {
-      device_id: userId, goal_type: "machine",
+      user_id: userId, goal_type: "machine",
       goal_name: "Mesin Penggoreng Automatik",
       target_amount: 3500, current_saved: 1850,
       selected_plan: { monthly: 350, months: 5, label: "Agresif — 5 bulan" },
     },
     {
-      device_id: userId, goal_type: "branch",
+      user_id: userId, goal_type: "branch",
       goal_name: "Buka Gerai Kedua di Presint 11",
       target_amount: 15000, current_saved: 2200,
       selected_plan: { monthly: 600, months: 21, label: "Sederhana — 21 bulan" },
@@ -954,7 +954,7 @@ export default function DemoSeeder() {
       // ── 9. Sisa Harian (Waste Tracker) ────────────────────────────────────
       setS("Memuatkan data sisa harian (60 hari)...", 56);
       const sisa = generateSisaHarian(userId);
-      await run("sisa_harian delete", () => supabase.from("sisa_harian").delete().eq("device_id", userId));
+      await run("sisa_harian delete", () => supabase.from("sisa_harian").delete().eq("user_id", userId));
       for (let i = 0; i < sisa.length; i += 100) {
         await run("sisa_harian insert", () => supabase.from("sisa_harian").insert(sisa.slice(i, i + 100)));
         setProgress(56 + Math.floor((i / sisa.length) * 6));
@@ -962,13 +962,13 @@ export default function DemoSeeder() {
 
       // ── 10. User Impian (Goals) ────────────────────────────────────────────
       setS("Memuatkan Tabung Impian (2 matlamat)...", 63);
-      await run("user_impian delete", () => supabase.from("user_impian").delete().eq("device_id", userId));
+      await run("user_impian delete", () => supabase.from("user_impian").delete().eq("user_id", userId));
       await run("user_impian insert", () => supabase.from("user_impian").insert(generateImpian(userId)));
 
       // ── 11. Nightly Reports (insert + capture generated UUIDs) ─────────────
       setS("Memuatkan laporan malam (60 hari)...", 67);
       const reports = generateNightlyReports(userId);
-      await run("nightly_reports delete", () => supabase.from("nightly_reports").delete().eq("device_id", userId));
+      await run("nightly_reports delete", () => supabase.from("nightly_reports").delete().eq("user_id", userId));
       const reportIdByDate: Record<string, string> = {};
       for (let i = 0; i < reports.length; i += 50) {
         const { data, error } = await supabase
@@ -986,7 +986,7 @@ export default function DemoSeeder() {
 
       // ── 12. Action Items (linked via report UUIDs) ────────────────────────
       setS("Memuatkan item tindakan...", 76);
-      await run("action_items_log delete", () => supabase.from("action_items_log").delete().eq("device_id", userId));
+      await run("action_items_log delete", () => supabase.from("action_items_log").delete().eq("user_id", userId));
       const actions = buildActionItems(userId, reportIdByDate);
       if (actions.length) {
         await run("action_items_log insert", () => supabase.from("action_items_log").insert(actions));
@@ -994,7 +994,7 @@ export default function DemoSeeder() {
 
       // ── 13. Forecast Accuracy ──────────────────────────────────────────────
       setS("Memuatkan data ramalan (30 hari)...", 80);
-      await run("forecasts delete", () => supabase.from("forecasts").delete().eq("device_id", userId));
+      await run("forecasts delete", () => supabase.from("forecasts").delete().eq("user_id", userId));
       await run("forecasts insert", () => supabase.from("forecasts").insert(generateForecasts(userId)));
 
       // ── 14. AI Chat History ────────────────────────────────────────────────
@@ -1094,11 +1094,11 @@ export default function DemoSeeder() {
       "products", "cooking_logs", "saved_cards", "chat_history",
     ];
     for (const t of tables) await supabase.from(t as any).delete().eq("user_id", userId);
-    try { await supabase.from("sisa_harian").delete().eq("device_id", userId); } catch {}
-    try { await supabase.from("user_impian").delete().eq("device_id", userId); } catch {}
-    try { await supabase.from("nightly_reports").delete().eq("device_id", userId); } catch {}
-    try { await supabase.from("action_items_log").delete().eq("device_id", userId); } catch {}
-    try { await supabase.from("forecasts").delete().eq("device_id", userId); } catch {}
+    try { await supabase.from("sisa_harian").delete().eq("user_id", userId); } catch {}
+    try { await supabase.from("user_impian").delete().eq("user_id", userId); } catch {}
+    try { await supabase.from("nightly_reports").delete().eq("user_id", userId); } catch {}
+    try { await supabase.from("action_items_log").delete().eq("user_id", userId); } catch {}
+    try { await supabase.from("forecasts").delete().eq("user_id", userId); } catch {}
     try { await supabase.from("profiles").delete().eq("id", userId); } catch {}
     await supabase.from("business_hours").delete().eq("user_id", userId);
     await supabase.from("outlet_settings").delete().eq("user_id", userId);
