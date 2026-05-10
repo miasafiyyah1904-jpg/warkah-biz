@@ -438,6 +438,40 @@ function generateOpex() {
   push(15, 8, 0, "Lain-lain", "Langganan WhatsApp Business — 3 bulan", 45);
   push(5, 10, 0, "Lain-lain", "Ubahsuai papan tanda harga — tukar font", 28);
 
+  // ── TODAY'S MOCK PERBELANJAAN (Sabtu 10 Mei 2026) ──────────────────────────
+  const todayOpex = [
+    { id: id + 10, category: "Kos Bahan" as const,
+      desc: "Beras, santan, ikan bilis — Pasar Borong Presint 9",
+      amount: 68, time: timeFmt(5, 30), ts: ts(0, 5, 30),
+      created_at: new Date(ts(0, 5, 30)).toISOString(), paid_from_petty: false },
+    { id: id + 20, category: "Kos Bahan" as const,
+      desc: "Ayam & paru-paru — Pembekal Ustaz Hamid",
+      amount: 74, time: timeFmt(5, 50), ts: ts(0, 5, 50),
+      created_at: new Date(ts(0, 5, 50)).toISOString(), paid_from_petty: false },
+    { id: id + 30, category: "Kos Bahan" as const,
+      desc: "Sayuran segar & rempah ratus — pasar pagi",
+      amount: 17, time: timeFmt(6, 5), ts: ts(0, 6, 5),
+      created_at: new Date(ts(0, 6, 5)).toISOString(), paid_from_petty: true },
+    { id: id + 40, category: "Pembungkusan" as const,
+      desc: "Bungkus nasi tambahan (500 pcs) — restock Sabtu",
+      amount: 22, time: timeFmt(7, 15), ts: ts(0, 7, 15),
+      created_at: new Date(ts(0, 7, 15)).toISOString(), paid_from_petty: true },
+    { id: id + 50, category: "Utiliti" as const,
+      desc: "Gas masak — isi semula 1 tong (stok hampir habis)",
+      amount: 35, time: timeFmt(7, 45), ts: ts(0, 7, 45),
+      created_at: new Date(ts(0, 7, 45)).toISOString(), paid_from_petty: false },
+    { id: id + 60, category: "Pengangkutan" as const,
+      desc: "Tambang van — hantar & ambil stok pasar borong",
+      amount: 25, time: timeFmt(8, 0), ts: ts(0, 8, 0),
+      created_at: new Date(ts(0, 8, 0)).toISOString(), paid_from_petty: true },
+    { id: id + 70, category: "Lain-lain" as const,
+      desc: "Sabun cuci & sarung tangan nitrile — 2 kotak",
+      amount: 14, time: timeFmt(8, 30), ts: ts(0, 8, 30),
+      created_at: new Date(ts(0, 8, 30)).toISOString(), paid_from_petty: true },
+  ];
+  todayOpex.forEach(e => entries.push(e));
+  // ── END TODAY'S MOCK ──────────────────────────────────────────────────────────
+
   return entries;
 }
 
