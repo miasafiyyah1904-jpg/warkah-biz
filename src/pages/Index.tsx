@@ -25,7 +25,7 @@ import { NotificationCenter, getActiveOpportunityCount } from "@/features/notifi
 import { ProfileView } from "@/features/profile/ProfileView";
 import { CookingLogModal } from "@/features/cooking/CookingLogModal";
 import OnboardingTutorial from "@/components/OnboardingTutorial";
-import DemoSeeder from "@/components/DemoSeeder";
+
 import { CookingLogPrompt } from "@/features/cooking/CookingLogPrompt";
 import { fmt } from "@/lib/format";
 import { emojiForItem } from "@/lib/stockEmoji";
