@@ -4,7 +4,7 @@ import { getDeviceId } from "@/features/goals/impianApi";
 
 export interface NightlyReportRow {
   id: string;
-  device_id: string;
+  user_id: string;
   business_name: string | null;
   report_date: string;
   total_sales: number;
@@ -36,7 +36,7 @@ export interface NightlyReportRow {
 
 export interface ActionItemRow {
   id: string;
-  device_id: string;
+  user_id: string;
   report_id: string | null;
   report_date: string;
   action_text: string;
@@ -48,15 +48,15 @@ export interface ActionItemRow {
 
 export type NightlyReportInput = Omit<
   NightlyReportRow,
-  "id" | "device_id" | "created_at" | "updated_at" | "generated_at" | "read_at"
+  "id" | "user_id" | "created_at" | "updated_at" | "generated_at" | "read_at"
 > & { read_at?: string | null };
 
 export async function upsertNightlyReport(input: NightlyReportInput): Promise<NightlyReportRow> {
-  const device_id = await getDeviceId();
-  const payload = { ...input, device_id, generated_at: new Date().toISOString() };
+  const user_id = await getDeviceId();
+  const payload = { ...input, user_id, generated_at: new Date().toISOString() };
   const { data, error } = await supabase
     .from("nightly_reports")
-    .upsert(payload as never, { onConflict: "device_id,report_date" })
+    .upsert(payload as never, { onConflict: "user_id,report_date" })
     .select()
     .single();
   if (error) throw error;
@@ -64,11 +64,11 @@ export async function upsertNightlyReport(input: NightlyReportInput): Promise<Ni
 }
 
 export async function fetchNightlyReports(): Promise<NightlyReportRow[]> {
-  const device_id = await getDeviceId();
+  const user_id = await getDeviceId();
   const { data, error } = await supabase
     .from("nightly_reports")
     .select("*")
-    .eq("device_id", device_id)
+    .eq("user_id", user_id)
     .order("report_date", { ascending: false })
     .limit(60);
   if (error) throw error;
@@ -76,11 +76,11 @@ export async function fetchNightlyReports(): Promise<NightlyReportRow[]> {
 }
 
 export async function fetchReportByDate(date: string): Promise<NightlyReportRow | null> {
-  const device_id = await getDeviceId();
+  const user_id = await getDeviceId();
   const { data, error } = await supabase
     .from("nightly_reports")
     .select("*")
-    .eq("device_id", device_id)
+    .eq("user_id", user_id)
     .eq("report_date", date)
     .maybeSingle();
   if (error) throw error;
@@ -111,9 +111,9 @@ export async function createActionItems(
   texts: string[],
 ): Promise<ActionItemRow[]> {
   if (!texts.length) return [];
-  const device_id = await getDeviceId();
+  const user_id = await getDeviceId();
   const rows = texts.map((t) => ({
-    device_id,
+    user_id,
     report_id: reportId,
     report_date: reportDate,
     action_text: t,
