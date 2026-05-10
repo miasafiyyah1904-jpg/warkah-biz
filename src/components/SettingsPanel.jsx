@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 import { useTheme } from "@/context/ThemeContext.jsx";
 import { useTranslation } from "@/hooks/useTranslation.js";
+import { useAuth } from "@/context/AuthContext";
+import { seedDemoData, clearDemoData } from "@/components/DemoSeeder";
 
 function initials(name) {
   const p = (name || "").trim().split(/\s+/).filter(Boolean);
