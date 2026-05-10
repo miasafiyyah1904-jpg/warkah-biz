@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
-import DemoSeeder from "@/components/DemoSeeder";
+
 import {
   Home, Package, BarChart3, Plus, MessageCircle,
   Calculator, Target, LineChart, Trash2, FileText, User,
@@ -441,7 +441,7 @@ const Index = () => {
 
   return (
     <div className="bg-gradient-shell min-h-screen text-foreground">
-      <DemoSeeder />
+
       <div className="mx-auto w-full max-w-[440px] min-h-screen relative bg-background shadow-card overflow-hidden flex flex-col">
         <AppHeader
           businessName={businessName || profileName}
