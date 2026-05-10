@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 import { useTheme } from "@/context/ThemeContext.jsx";
 import { useTranslation } from "@/hooks/useTranslation.js";
+import { useAuth } from "@/context/AuthContext";
+import { seedDemoData, clearDemoData } from "@/components/DemoSeeder";
 
 function initials(name) {
   const p = (name || "").trim().split(/\s+/).filter(Boolean);
@@ -23,11 +26,41 @@ function initials(name) {
 export default function SettingsPanel({ open, onClose, profileName, businessName, onSaveProfile, onLogout }) {
   const { t, language, setLanguage } = useTranslation();
   const { theme, setTheme } = useTheme();
+  const { userId } = useAuth();
   const [name, setName] = useState(profileName);
   const [biz, setBiz] = useState(businessName);
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const [demoBusy, setDemoBusy] = useState(false);
+
+  const demoActive = typeof window !== "undefined" && localStorage.getItem("warkahbiz_demo_mode_active") === "1";
 
   if (!open) return null;
+
+  const handleLoadDemo = async () => {
+    if (!userId || demoBusy) return;
+    setDemoBusy(true);
+    try {
+      await seedDemoData(userId);
+      toast.success("✅ Data demo berjaya dimuat!");
+    } catch (e) {
+      toast.error(`Ralat: ${e?.message || "gagal memuatkan data demo"}`);
+    } finally {
+      setDemoBusy(false);
+    }
+  };
+
+  const handleClearDemo = async () => {
+    if (!userId || demoBusy) return;
+    setDemoBusy(true);
+    try {
+      await clearDemoData(userId);
+      toast.success("🗑️ Data demo telah dipadam");
+    } catch (e) {
+      toast.error(`Ralat: ${e?.message || "gagal memadam data demo"}`);
+    } finally {
+      setDemoBusy(false);
+    }
+  };
 
   const langs = [
     { code: "ms", flag: "🇲🇾", native: t("langNativeMs"), alias: t("langAliasMs") },
@@ -120,6 +153,31 @@ export default function SettingsPanel({ open, onClose, profileName, businessName
               {t("saveChanges")}
             </button>
           </section>
+
+          {demoActive ? (
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Mod Demo 🎬</h3>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={handleLoadDemo}
+                  disabled={demoBusy}
+                  className="tap w-full h-12 rounded-2xl bg-profit text-profit-foreground font-bold disabled:opacity-60"
+                >
+                  {demoBusy ? "Memuatkan..." : "🚀 Muat Data Demo"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearDemo}
+                  disabled={demoBusy}
+                  className="tap w-full h-12 rounded-2xl bg-cost text-cost-foreground font-bold disabled:opacity-60"
+                >
+                  {demoBusy ? "Memadam..." : "🗑️ Padam Data Demo"}
+                </button>
+                <p className="text-xs text-muted-foreground text-center mt-1">Untuk tujuan demonstrasi sahaja</p>
+              </div>
+            </section>
+          ) : null}
         </div>
 
         <div className="p-4 border-t border-border">

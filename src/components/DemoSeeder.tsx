@@ -925,20 +925,12 @@ const COOKING_PRESETS = [
   },
 ];
 
-// ─── MAIN SEEDER COMPONENT ────────────────────────────────────────────────────
+// ─── EXPORTED ACTIONS (no UI) ─────────────────────────────────────────────────
 
-export default function DemoSeeder() {
-  const { userId } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
-  const [step, setStep] = useState("");
-  const [progress, setProgress] = useState(0);
-
-  const seed = async () => {
-    if (!userId) { toast.error("Sila log masuk dahulu"); return; }
-    setLoading(true); setProgress(0);
-
-    const setS = (s: string, p: number) => { setStep(s); setProgress(p); };
+export async function seedDemoData(userId: string): Promise<void> {
+  if (!userId) throw new Error("missing userId");
+  const setS = (_s: string, _p: number) => {};
+  {
 
     try {
       // ── 1. localStorage (instant) ──────────────────────────────────────────
@@ -1135,111 +1127,36 @@ export default function DemoSeeder() {
       });
 
       setS("✅ Selesai!", 100);
-      setDone(true);
-      toast.success("✅ Data demo lengkap dimuatkan! Sila refresh halaman.");
     } catch (err: any) {
       console.error(err);
-      toast.error(`Ralat: ${err?.message || "Semak console."}`);
-    } finally {
-      setLoading(false);
+      throw err;
     }
-  };
-
-  const clear = async () => {
-    if (!userId) return;
-    setLoading(true); setStep("Memadam...");
-    const tables = [
-      "transactions", "stock_items", "buy_items", "petty_entries", "opex_entries",
-      "products", "cooking_logs", "saved_cards", "chat_history",
-    ];
-    for (const t of tables) await supabase.from(t as any).delete().eq("user_id", userId);
-    try { await supabase.from("sisa_harian").delete().eq("device_id", userId); } catch {}
-    try { await supabase.from("user_impian").delete().eq("device_id", userId); } catch {}
-    try { await supabase.from("nightly_reports").delete().eq("device_id", userId); } catch {}
-    try { await supabase.from("action_items_log").delete().eq("device_id", userId); } catch {}
-    try { await supabase.from("forecasts").delete().eq("device_id", userId); } catch {}
-    try { await supabase.from("profiles").delete().eq("id", userId); } catch {}
-    await supabase.from("business_hours").delete().eq("user_id", userId);
-    await supabase.from("outlet_settings").delete().eq("user_id", userId);
-    await supabase.from("petty_settings").delete().eq("user_id", userId);
-    [
-      "warkahbiz_profile_name", "warkahbiz_business_name",
-      "warkahbiz_weekly_target", "warkahbiz_weekly_budget",
-      "warkahbiz_cooking_presets",
-      `warkahbiz_suppliers_${userId}`,
-      `warkahbiz_tutorial_done_${userId}`,
-    ].forEach(k => localStorage.removeItem(k));
-    toast.success("Semua data demo dipadam.");
-    setDone(false); setLoading(false); setStep(""); setProgress(0);
-  };
-
-  // ── UI ─────────────────────────────────────────────────────────────────────
-
-  const features = [
-    "💰 180 hari jualan", "📊 8 kategori opex", "🌙 Ramadan + Raya",
-    "🗑️ Sisa harian", "🏆 2 Impian", "💬 Chat AI",
-    "📋 Laporan malam", "✅ Action items", "📈 Forecast",
-    "🏪 5 Pembekal", "🍳 4 Preset masak", "👷 Gaji Norizan",
-  ];
-
-  return (
-    <div style={{
-      position: "fixed", bottom: 20, right: 20, zIndex: 9999,
-      background: "#fff", border: "1px solid #e5e7eb", borderRadius: 14,
-      padding: "16px 18px", boxShadow: "0 6px 24px rgba(0,0,0,0.13)",
-      width: 300, fontFamily: "sans-serif", fontSize: 13,
-    }}>
-      <p style={{ fontWeight: 800, margin: "0 0 1px", color: "#111", fontSize: 14 }}>
-        🎬 Demo Seeder v3 — LENGKAP
-      </p>
-      <p style={{ color: "#6b7280", margin: "0 0 10px", fontSize: 10 }}>
-        Gerai Nasi Lemak Pak Arif · 180 hari · Semua ciri aktif
-      </p>
-
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginBottom: 10 }}>
-        {features.map(f => (
-          <span key={f} style={{
-            background: "#f0fdf4", color: "#166534", borderRadius: 5,
-            padding: "2px 5px", fontSize: 9, fontWeight: 600,
-          }}>{f}</span>
-        ))}
-      </div>
-
-      {step && <p style={{ color: "#0f6e56", margin: "0 0 6px", fontSize: 11, fontWeight: 600 }}>{step}</p>}
-
-      {loading && (
-        <div style={{ height: 6, background: "#e5e7eb", borderRadius: 3, marginBottom: 10, overflow: "hidden" }}>
-          <div style={{
-            height: "100%", width: `${progress}%`, borderRadius: 3,
-            background: "linear-gradient(90deg, #1d9e75, #0f6e56)",
-            transition: "width 0.4s ease",
-          }} />
-        </div>
-      )}
-
-      {!done ? (
-        <button onClick={seed} disabled={loading} style={{
-          width: "100%", padding: "10px 0", borderRadius: 9,
-          background: loading ? "#e5e7eb" : "linear-gradient(135deg, #1d9e75, #0f6e56)",
-          color: loading ? "#9ca3af" : "#fff", border: "none",
-          cursor: loading ? "not-allowed" : "pointer",
-          fontWeight: 800, fontSize: 13, letterSpacing: "0.3px",
-        }}>
-          {loading ? `Memuatkan... ${progress}%` : "🚀 Load Complete Demo Data"}
-        </button>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <p style={{ color: "#0f6e56", fontWeight: 800, margin: 0, fontSize: 13 }}>
-            ✅ Berjaya! Sila refresh halaman.
-          </p>
-          <button onClick={clear} disabled={loading} style={{
-            padding: "8px 0", borderRadius: 8, background: "#fee2e2",
-            color: "#991b1b", border: "none", cursor: "pointer", fontWeight: 700, fontSize: 12,
-          }}>
-            {loading ? "Memadam..." : "🗑️ Padam Semua Data Demo"}
-          </button>
-        </div>
-      )}
-    </div>
-  );
+  }
 }
+
+export async function clearDemoData(userId: string): Promise<void> {
+  if (!userId) throw new Error("missing userId");
+  const tables = [
+    "transactions", "stock_items", "buy_items", "petty_entries", "opex_entries",
+    "products", "cooking_logs", "saved_cards", "chat_history",
+  ];
+  for (const t of tables) await supabase.from(t as any).delete().eq("user_id", userId);
+  try { await supabase.from("sisa_harian").delete().eq("device_id", userId); } catch {}
+  try { await supabase.from("user_impian").delete().eq("device_id", userId); } catch {}
+  try { await supabase.from("nightly_reports").delete().eq("device_id", userId); } catch {}
+  try { await supabase.from("action_items_log").delete().eq("device_id", userId); } catch {}
+  try { await supabase.from("forecasts").delete().eq("device_id", userId); } catch {}
+  try { await supabase.from("profiles").delete().eq("id", userId); } catch {}
+  await supabase.from("business_hours").delete().eq("user_id", userId);
+  await supabase.from("outlet_settings").delete().eq("user_id", userId);
+  await supabase.from("petty_settings").delete().eq("user_id", userId);
+  [
+    "warkahbiz_profile_name", "warkahbiz_business_name",
+    "warkahbiz_weekly_target", "warkahbiz_weekly_budget",
+    "warkahbiz_cooking_presets",
+    `warkahbiz_suppliers_${userId}`,
+    `warkahbiz_tutorial_done_${userId}`,
+  ].forEach(k => localStorage.removeItem(k));
+}
+
+export default function DemoSeeder() { return null; }

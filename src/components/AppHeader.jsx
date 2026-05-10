@@ -1,5 +1,6 @@
+import { useRef } from "react";
 import { Bell, Settings, HelpCircle } from "lucide-react";
-import AppLogo from "@/components/AppLogo.jsx";
+import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation.js";
 
 /**
@@ -8,11 +9,28 @@ import { useTranslation } from "@/hooks/useTranslation.js";
 export default function AppHeader({ businessName, onOpenSettings, onOpenNotifications, notificationCount, showNotificationDot, onReplayTutorial }) {
   const { t } = useTranslation();
   const count = notificationCount || 0;
+  const tapsRef = useRef([]);
+
+  const handleLogoTap = () => {
+    const now = Date.now();
+    tapsRef.current = [...tapsRef.current.filter((t) => now - t < 3000), now];
+    if (tapsRef.current.length >= 5) {
+      tapsRef.current = [];
+      try {
+        if (localStorage.getItem("warkahbiz_demo_mode_active") !== "1") {
+          localStorage.setItem("warkahbiz_demo_mode_active", "1");
+          toast.success("🎬 Mod Demo diaktifkan");
+        }
+      } catch {}
+    }
+  };
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between gap-3 px-4 py-3 border-b border-border bg-background/95 backdrop-blur-md">
       <div className="flex items-center min-w-0">
-        <img src="/warkahbiz-logo.png" alt="WarkahBiz" className="h-8 w-auto" />
+        <button type="button" onClick={handleLogoTap} aria-label="WarkahBiz" className="tap">
+          <img src="/warkahbiz-logo.png" alt="WarkahBiz" className="h-8 w-auto" />
+        </button>
       </div>
       <div className="flex items-center gap-1 shrink-0">
         {onReplayTutorial ? (

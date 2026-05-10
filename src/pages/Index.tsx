@@ -25,7 +25,7 @@ import { NotificationCenter, getActiveOpportunityCount } from "@/features/notifi
 import { ProfileView } from "@/features/profile/ProfileView";
 import { CookingLogModal } from "@/features/cooking/CookingLogModal";
 import OnboardingTutorial from "@/components/OnboardingTutorial";
-import DemoSeeder from "@/components/DemoSeeder";
+
 import { CookingLogPrompt } from "@/features/cooking/CookingLogPrompt";
 import { fmt } from "@/lib/format";
 import { emojiForItem } from "@/lib/stockEmoji";
@@ -442,7 +442,7 @@ const Index = () => {
 
   return (
     <div className="bg-gradient-shell min-h-screen text-foreground">
-      <DemoSeeder />
+      
       <div className="mx-auto w-full max-w-[440px] min-h-screen relative bg-background shadow-card overflow-hidden flex flex-col">
         <AppHeader
           businessName={businessName || profileName}
