@@ -17,7 +17,7 @@ export interface SelectedPlan {
 
 export interface Impian {
   id: string;
-  device_id: string;
+  user_id: string;
   goal_type: GoalType;
   goal_name: string;
   target_amount: number;
@@ -32,7 +32,7 @@ export async function listImpian(): Promise<Impian[]> {
   const { data, error } = await supabase
     .from("user_impian")
     .select("*")
-    .eq("device_id", deviceId)
+    .eq("user_id", deviceId)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as unknown as Impian[];
@@ -46,7 +46,7 @@ export async function createImpian(input: {
   selected_plan: SelectedPlan | null;
 }): Promise<Impian> {
   const deviceId = await getDeviceId();
-  const payload = { ...input, device_id: deviceId, selected_plan: input.selected_plan as never };
+  const payload = { ...input, user_id: deviceId, selected_plan: input.selected_plan as never };
   const { data, error } = await supabase
     .from("user_impian")
     .insert(payload)

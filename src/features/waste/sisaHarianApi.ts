@@ -4,7 +4,7 @@ import { getDeviceId } from "@/features/goals/impianApi";
 
 export interface SisaRow {
   id: string;
-  device_id: string;
+  user_id: string;
   product_id: string;
   product_name: string;
   log_date: string; // YYYY-MM-DD
@@ -18,14 +18,14 @@ export interface SisaRow {
   updated_at: string;
 }
 
-export type SisaUpsert = Omit<SisaRow, "id" | "device_id" | "created_at" | "updated_at">;
+export type SisaUpsert = Omit<SisaRow, "id" | "user_id" | "created_at" | "updated_at">;
 
 export async function fetchSisaRange(fromDate: string, toDate: string): Promise<SisaRow[]> {
-  const device_id = await getDeviceId();
+  const user_id = await getDeviceId();
   const { data, error } = await supabase
     .from("sisa_harian")
     .select("*")
-    .eq("device_id", device_id)
+    .eq("user_id", user_id)
     .gte("log_date", fromDate)
     .lte("log_date", toDate)
     .order("log_date", { ascending: true });
@@ -37,11 +37,11 @@ export async function fetchSisaRange(fromDate: string, toDate: string): Promise<
 }
 
 export async function fetchSisaForDate(date: string): Promise<SisaRow[]> {
-  const device_id = await getDeviceId();
+  const user_id = await getDeviceId();
   const { data, error } = await supabase
     .from("sisa_harian")
     .select("*")
-    .eq("device_id", device_id)
+    .eq("user_id", user_id)
     .eq("log_date", date);
   if (error) {
     console.error("fetchSisaForDate", error);
@@ -52,11 +52,11 @@ export async function fetchSisaForDate(date: string): Promise<SisaRow[]> {
 
 export async function upsertSisaBatch(rows: SisaUpsert[]): Promise<boolean> {
   if (!rows.length) return true;
-  const device_id = await getDeviceId();
-  const payload = rows.map((r) => ({ ...r, device_id }));
+  const user_id = await getDeviceId();
+  const payload = rows.map((r) => ({ ...r, user_id }));
   const { error } = await supabase
     .from("sisa_harian")
-    .upsert(payload, { onConflict: "device_id,product_id,log_date" });
+    .upsert(payload, { onConflict: "user_id,product_id,log_date" });
   if (error) {
     console.error("upsertSisaBatch", error);
     return false;
