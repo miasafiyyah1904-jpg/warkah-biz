@@ -153,6 +153,31 @@ export default function SettingsPanel({ open, onClose, profileName, businessName
               {t("saveChanges")}
             </button>
           </section>
+
+          {demoActive ? (
+            <section>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Mod Demo 🎬</h3>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={handleLoadDemo}
+                  disabled={demoBusy}
+                  className="tap w-full h-12 rounded-2xl bg-profit text-profit-foreground font-bold disabled:opacity-60"
+                >
+                  {demoBusy ? "Memuatkan..." : "🚀 Muat Data Demo"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearDemo}
+                  disabled={demoBusy}
+                  className="tap w-full h-12 rounded-2xl bg-cost text-cost-foreground font-bold disabled:opacity-60"
+                >
+                  {demoBusy ? "Memadam..." : "🗑️ Padam Data Demo"}
+                </button>
+                <p className="text-xs text-muted-foreground text-center mt-1">Untuk tujuan demonstrasi sahaja</p>
+              </div>
+            </section>
+          ) : null}
         </div>
 
         <div className="p-4 border-t border-border">
