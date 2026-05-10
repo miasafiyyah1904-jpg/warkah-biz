@@ -26,11 +26,41 @@ function initials(name) {
 export default function SettingsPanel({ open, onClose, profileName, businessName, onSaveProfile, onLogout }) {
   const { t, language, setLanguage } = useTranslation();
   const { theme, setTheme } = useTheme();
+  const { userId } = useAuth();
   const [name, setName] = useState(profileName);
   const [biz, setBiz] = useState(businessName);
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const [demoBusy, setDemoBusy] = useState(false);
+
+  const demoActive = typeof window !== "undefined" && localStorage.getItem("warkahbiz_demo_mode_active") === "1";
 
   if (!open) return null;
+
+  const handleLoadDemo = async () => {
+    if (!userId || demoBusy) return;
+    setDemoBusy(true);
+    try {
+      await seedDemoData(userId);
+      toast.success("✅ Data demo berjaya dimuat!");
+    } catch (e) {
+      toast.error(`Ralat: ${e?.message || "gagal memuatkan data demo"}`);
+    } finally {
+      setDemoBusy(false);
+    }
+  };
+
+  const handleClearDemo = async () => {
+    if (!userId || demoBusy) return;
+    setDemoBusy(true);
+    try {
+      await clearDemoData(userId);
+      toast.success("🗑️ Data demo telah dipadam");
+    } catch (e) {
+      toast.error(`Ralat: ${e?.message || "gagal memadam data demo"}`);
+    } finally {
+      setDemoBusy(false);
+    }
+  };
 
   const langs = [
     { code: "ms", flag: "🇲🇾", native: t("langNativeMs"), alias: t("langAliasMs") },
