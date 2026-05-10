@@ -18,35 +18,35 @@ export type Database = {
         Row: {
           action_text: string
           created_at: string
+          device_id: string
           done_at: string | null
           id: string
           is_done: boolean
           report_date: string
           report_id: string | null
           updated_at: string
-          user_id: string
         }
         Insert: {
           action_text: string
           created_at?: string
+          device_id: string
           done_at?: string | null
           id?: string
           is_done?: boolean
           report_date: string
           report_id?: string | null
           updated_at?: string
-          user_id: string
         }
         Update: {
           action_text?: string
           created_at?: string
+          device_id?: string
           done_at?: string | null
           id?: string
           is_done?: boolean
           report_date?: string
           report_id?: string | null
           updated_at?: string
-          user_id?: string
         }
         Relationships: [
           {
@@ -197,12 +197,12 @@ export type Database = {
           baseline: number
           created_at: string
           day_index: number
+          device_id: string
           forecast_date: string
           id: string
           predicted_high: number
           predicted_low: number
           predicted_revenue: number
-          user_id: string
           weather_adjust: number
           weather_label: string | null
         }
@@ -212,12 +212,12 @@ export type Database = {
           baseline?: number
           created_at?: string
           day_index?: number
+          device_id: string
           forecast_date: string
           id?: string
           predicted_high?: number
           predicted_low?: number
           predicted_revenue?: number
-          user_id: string
           weather_adjust?: number
           weather_label?: string | null
         }
@@ -227,12 +227,12 @@ export type Database = {
           baseline?: number
           created_at?: string
           day_index?: number
+          device_id?: string
           forecast_date?: string
           id?: string
           predicted_high?: number
           predicted_low?: number
           predicted_revenue?: number
-          user_id?: string
           weather_adjust?: number
           weather_label?: string | null
         }
@@ -248,6 +248,7 @@ export type Database = {
           business_name: string | null
           created_at: string
           critical_stock_items: Json | null
+          device_id: string
           expense_change_pct: number | null
           generated_at: string
           id: string
@@ -263,7 +264,6 @@ export type Database = {
           total_sales: number
           transaction_count: number
           updated_at: string
-          user_id: string
           weekly_budget: number
           weekly_expenses: number
           weekly_revenue: number
@@ -279,6 +279,7 @@ export type Database = {
           business_name?: string | null
           created_at?: string
           critical_stock_items?: Json | null
+          device_id: string
           expense_change_pct?: number | null
           generated_at?: string
           id?: string
@@ -294,7 +295,6 @@ export type Database = {
           total_sales?: number
           transaction_count?: number
           updated_at?: string
-          user_id: string
           weekly_budget?: number
           weekly_expenses?: number
           weekly_revenue?: number
@@ -310,6 +310,7 @@ export type Database = {
           business_name?: string | null
           created_at?: string
           critical_stock_items?: Json | null
+          device_id?: string
           expense_change_pct?: number | null
           generated_at?: string
           id?: string
@@ -325,7 +326,6 @@ export type Database = {
           total_sales?: number
           transaction_count?: number
           updated_at?: string
-          user_id?: string
           weekly_budget?: number
           weekly_expenses?: number
           weekly_revenue?: number
@@ -584,6 +584,7 @@ export type Database = {
         Row: {
           ai_suggested_qty: number | null
           created_at: string
+          device_id: string
           id: string
           leftover_qty: number
           leftover_value: number
@@ -594,11 +595,11 @@ export type Database = {
           sold_qty: number
           unit_cost: number
           updated_at: string
-          user_id: string
         }
         Insert: {
           ai_suggested_qty?: number | null
           created_at?: string
+          device_id: string
           id?: string
           leftover_qty?: number
           leftover_value?: number
@@ -609,11 +610,11 @@ export type Database = {
           sold_qty?: number
           unit_cost?: number
           updated_at?: string
-          user_id: string
         }
         Update: {
           ai_suggested_qty?: number | null
           created_at?: string
+          device_id?: string
           id?: string
           leftover_qty?: number
           leftover_value?: number
@@ -624,7 +625,6 @@ export type Database = {
           sold_qty?: number
           unit_cost?: number
           updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
@@ -719,35 +719,35 @@ export type Database = {
         Row: {
           created_at: string
           current_saved: number
+          device_id: string
           goal_name: string
           goal_type: string
           id: string
           selected_plan: Json | null
           target_amount: number
           updated_at: string
-          user_id: string
         }
         Insert: {
           created_at?: string
           current_saved?: number
+          device_id: string
           goal_name: string
           goal_type: string
           id?: string
           selected_plan?: Json | null
           target_amount?: number
           updated_at?: string
-          user_id: string
         }
         Update: {
           created_at?: string
           current_saved?: number
+          device_id?: string
           goal_name?: string
           goal_type?: string
           id?: string
           selected_plan?: Json | null
           target_amount?: number
           updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }

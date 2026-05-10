@@ -15,20 +15,20 @@ export interface ForecastSavePayload {
 
 export async function saveForecasts(items: ForecastSavePayload[]) {
   if (!items.length) return { error: null };
-  const user_id = await getDeviceId();
-  const rows = items.map((i) => ({ ...i, user_id }));
+  const device_id = await getDeviceId();
+  const rows = items.map((i) => ({ ...i, device_id }));
   const { error } = await supabase
     .from("forecasts")
-    .upsert(rows as never, { onConflict: "user_id,forecast_date" });
+    .upsert(rows as never, { onConflict: "device_id,forecast_date" });
   return { error };
 }
 
 export async function fetchPastAccuracy(limit = 30) {
-  const user_id = await getDeviceId();
+  const device_id = await getDeviceId();
   const { data, error } = await supabase
     .from("forecasts")
     .select("predicted_revenue, actual_revenue, accuracy_pct, forecast_date")
-    .eq("user_id", user_id)
+    .eq("device_id", device_id)
     .not("actual_revenue", "is", null)
     .order("forecast_date", { ascending: false })
     .limit(limit);
