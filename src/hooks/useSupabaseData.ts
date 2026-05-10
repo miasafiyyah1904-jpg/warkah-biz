@@ -85,10 +85,8 @@ export function useSupabaseData<T>(baseKey: string, initialValue: T) {
     }
     if (!store || !userId) return;
 
-    store.save(userId, value as any).then((ok) => {
-      if (!ok) toast.error("Gagal simpan ke cloud. Cuba lagi.");
-    }).catch(() => {
-      toast.error("Gagal simpan ke cloud. Cuba lagi.");
+    store.save(userId, value as any).catch(() => {
+      // silent fail — cloud save errors are not shown to user
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, value]);
