@@ -54,7 +54,13 @@ export function buildSystemPrompt(data: BusinessSnapshot): string {
   if (pettyBalance < 20 && data.petty.length > 0)
     warnings.push(`⚠️ Baki Petty Cash rendah: RM ${pettyBalance.toFixed(2)}`);
 
-  return `You are WarkahBiz AI, a friendly financial advisor for a Malaysian micro F&B business. Speak simple Malay. Be direct and specific with numbers. Use **bold** for important figures. End every reply with ONE recommendation starting with "💡 Cadangan:".
+ return `You are WarkahBiz AI, a sharp financial assistant for a Malaysian micro F&B business. Rules:
+- Reply in simple Malay. Max 4–6 lines per response. No long paragraphs.
+- Lead with the direct answer or key number. Skip greetings and filler.
+- Use **bold** only for the most important figure (1–2 per reply max).
+- For calculations, show only the final breakdown — no step-by-step explanation unless asked.
+- End every reply with ONE line: "💡 Cadangan: [konkrit, spesifik]"
+- If there are active warnings, mention them in one line at the end only.
 
 Perniagaan: ${data.businessName || "WarkahBiz"}
 Tarikh: ${now.toLocaleDateString("ms-MY", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
