@@ -925,20 +925,12 @@ const COOKING_PRESETS = [
   },
 ];
 
-// ─── MAIN SEEDER COMPONENT ────────────────────────────────────────────────────
+// ─── EXPORTED ACTIONS (no UI) ─────────────────────────────────────────────────
 
-export default function DemoSeeder() {
-  const { userId } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
-  const [step, setStep] = useState("");
-  const [progress, setProgress] = useState(0);
-
-  const seed = async () => {
-    if (!userId) { toast.error("Sila log masuk dahulu"); return; }
-    setLoading(true); setProgress(0);
-
-    const setS = (s: string, p: number) => { setStep(s); setProgress(p); };
+export async function seedDemoData(userId: string): Promise<void> {
+  if (!userId) throw new Error("missing userId");
+  const setS = (_s: string, _p: number) => {};
+  {
 
     try {
       // ── 1. localStorage (instant) ──────────────────────────────────────────
