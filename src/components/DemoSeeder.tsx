@@ -302,6 +302,31 @@ function generateTransactions() {
       created_at: new Date(ts(day, ram ? 17 : 8, 30)).toISOString(),
     });
   }
+
+  // ── TODAY'S MOCK JUALAN (Sabtu 10 Mei 2026) ─────────────────────────────────
+  const todayTxns = [
+    { id: id + 200, type: "in" as const, emoji: "💰", label: "Jualan Awal Pagi",
+      amount: 88, time: timeFmt(6, 15), ts: ts(0, 6, 15),
+      created_at: new Date(ts(0, 6, 15)).toISOString() },
+    { id: id + 210, type: "in" as const, emoji: "💰", label: "Nasi Lemak + Lauk",
+      amount: 112, time: timeFmt(7, 30), ts: ts(0, 7, 30),
+      created_at: new Date(ts(0, 7, 30)).toISOString() },
+    { id: id + 220, type: "in" as const, emoji: "🧋", label: "Teh Ais & Milo Ais",
+      amount: 46, time: timeFmt(8, 0), ts: ts(0, 8, 0),
+      created_at: new Date(ts(0, 8, 0)).toISOString() },
+    { id: id + 230, type: "in" as const, emoji: "💰", label: "Jualan Pagi",
+      amount: 94, time: timeFmt(9, 10), ts: ts(0, 9, 10),
+      created_at: new Date(ts(0, 9, 10)).toISOString() },
+    { id: id + 240, type: "in" as const, emoji: "💰", label: "Waktu Tengah Pagi",
+      amount: 67, time: timeFmt(10, 30), ts: ts(0, 10, 30),
+      created_at: new Date(ts(0, 10, 30)).toISOString() },
+    { id: id + 250, type: "in" as const, emoji: "💰", label: "Jualan Terus",
+      amount: 52, time: timeFmt(11, 45), ts: ts(0, 11, 45),
+      created_at: new Date(ts(0, 11, 45)).toISOString() },
+  ];
+  todayTxns.forEach(t => txns.push(t));
+  // ── END TODAY'S MOCK ──────────────────────────────────────────────────────────
+
   return txns;
 }
 
