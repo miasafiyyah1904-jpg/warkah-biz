@@ -30,12 +30,27 @@ const swallow = (label: string, error: unknown) => {
 /* ---------- list helpers ---------- */
 
 async function replaceAll(table: string, userId: string, rows: any[]): Promise<boolean> {
-  const { error: delErr } = await supabase.from(table as any).delete().eq("user_id", userId);
-  if (delErr) { swallow(`${table} delete`, delErr); return false; }
-  if (!rows.length) return true;
+  if (rows.length === 0) {
+    const { error } = await supabase.from(table as any).delete().eq("user_id", userId);
+    if (error) { swallow(`${table} clear`, error); return false; }
+    return true;
+  }
+
   const payload = rows.map((r) => ({ ...r, user_id: userId }));
-  const { error: insErr } = await supabase.from(table as any).insert(payload as any);
-  if (insErr) { swallow(`${table} insert`, insErr); return false; }
+
+  const { error: upsertErr } = await supabase
+    .from(table as any)
+    .upsert(payload as any, { onConflict: "user_id,id" });
+  if (upsertErr) { swallow(`${table} upsert`, upsertErr); return false; }
+
+  const currentIds = rows.map((r) => r.id);
+  const { error: delErr } = await supabase
+    .from(table as any)
+    .delete()
+    .eq("user_id", userId)
+    .not("id", "in", `(${currentIds.join(",")})`);
+  if (delErr) { swallow(`${table} delete stale`, delErr); return false; }
+
   return true;
 }
 
