@@ -930,6 +930,7 @@ const COOKING_PRESETS = [
 export async function seedDemoData(userId: string): Promise<void> {
   if (!userId) throw new Error("missing userId");
   const setS = (_s: string, _p: number) => {};
+  const setProgress = (_p: number) => {};
   {
 
     try {
