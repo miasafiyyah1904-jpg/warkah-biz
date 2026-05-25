@@ -87,7 +87,7 @@ export async function drainQueue(
   } catch {
     return;
   }
-  const entries: PendingWrite[] = await new Promise((resolve, reject) => {
+  const entries: PendingWrite[] = await new Promise<PendingWrite[]>((resolve, reject) => {
     const req = tx(db, "readonly").getAll();
     req.onsuccess = () => resolve((req.result as PendingWrite[]) ?? []);
     req.onerror = () => reject(req.error);
