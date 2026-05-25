@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { CLOUD_STORES } from "@/lib/supabaseData";
+import { enqueue } from "@/lib/offlineQueue";
 
 /**
  * Cloud-backed per-user storage hook.
@@ -85,8 +86,21 @@ export function useSupabaseData<T>(baseKey: string, initialValue: T) {
     }
     if (!store || !userId) return;
 
-    store.save(userId, value as any).catch(() => {
-      // silent fail — cloud save errors are not shown to user
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      enqueue(baseKey, userId, value as any);
+      return;
+    }
+
+    store.save(userId, value as any).catch((err: any) => {
+      const msg = String(err?.message ?? err ?? "");
+      if (
+        msg.includes("Failed to fetch") ||
+        msg.includes("NetworkError") ||
+        msg.includes("Load failed")
+      ) {
+        enqueue(baseKey, userId, value as any);
+      }
+      // otherwise silent
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, value]);

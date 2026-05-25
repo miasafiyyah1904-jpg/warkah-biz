@@ -13,7 +13,9 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { useServiceWorker } from "@/hooks/useServiceWorker";
 
 function NotFoundComponent() {
   return (
@@ -80,6 +82,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Warkah Biz" },
       { name: "description", content: "Secure Access Hub provides a complete user authentication system for your application." },
       { name: "author", content: "Lovable" },
+      { name: "theme-color", content: "#09090b" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Warkah Biz" },
       { property: "og:title", content: "Warkah Biz" },
       { property: "og:description", content: "Secure Access Hub provides a complete user authentication system for your application." },
       { property: "og:type", content: "website" },
@@ -95,6 +102,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/warkahbiz-logo.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -117,6 +126,17 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AppShell() {
+  const { userId } = useAuth();
+  useServiceWorker(userId);
+  return (
+    <>
+      <OfflineIndicator />
+      <Outlet />
+    </>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -127,7 +147,7 @@ function RootComponent() {
           <LanguageProvider>
             <TooltipProvider>
               <Sonner />
-              <Outlet />
+              <AppShell />
             </TooltipProvider>
           </LanguageProvider>
         </ThemeProvider>
