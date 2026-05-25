@@ -102,6 +102,18 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [autopsyOpen, userId]);
 
+  // Pre-fill profile from auth session on first login
+  useEffect(() => {
+    if (!userId || !user) return;
+    if (!profileName && user.user_metadata?.full_name) {
+      setProfileName(user.user_metadata.full_name);
+    }
+    const emailKey = `warkahbiz_profile_email_${userId}`;
+    if (!localStorage.getItem(emailKey) && user.email) {
+      localStorage.setItem(emailKey, user.email);
+    }
+  }, [user, userId, profileName, setProfileName]);
+
   const isPeribadi = (label: string, emoji: string) =>
     emoji === "🧑" || /peribadi/i.test(label);
 
