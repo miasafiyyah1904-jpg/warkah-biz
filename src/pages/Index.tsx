@@ -48,7 +48,7 @@ const greeting = () => {
 };
 
 const Index = () => {
-  const { userId, signOut } = useAuth();
+  const { userId, user, signOut } = useAuth();
   const language = "ms";
   const [tab, setTab] = useState<Tab>("today");
   const [modalOpen, setModalOpen] = useState(false);
