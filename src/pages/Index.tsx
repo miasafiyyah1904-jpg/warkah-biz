@@ -48,7 +48,7 @@ const greeting = () => {
 };
 
 const Index = () => {
-  const { userId, signOut } = useAuth();
+  const { userId, user, signOut } = useAuth();
   const language = "ms";
   const [tab, setTab] = useState<Tab>("today");
   const [modalOpen, setModalOpen] = useState(false);
@@ -101,6 +101,18 @@ const Index = () => {
     const interval = setInterval(check, 60_000);
     return () => clearInterval(interval);
   }, [autopsyOpen, userId]);
+
+  // Pre-fill profile from auth session on first login
+  useEffect(() => {
+    if (!userId || !user) return;
+    if (!profileName && user.user_metadata?.full_name) {
+      setProfileName(user.user_metadata.full_name);
+    }
+    const emailKey = `warkahbiz_profile_email_${userId}`;
+    if (!localStorage.getItem(emailKey) && user.email) {
+      localStorage.setItem(emailKey, user.email);
+    }
+  }, [user, userId, profileName, setProfileName]);
 
   const isPeribadi = (label: string, emoji: string) =>
     emoji === "🧑" || /peribadi/i.test(label);
