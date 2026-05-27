@@ -32,6 +32,7 @@ import { emojiForItem } from "@/lib/stockEmoji";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslation } from "@/context/LanguageContext";
 import type {
   Tab, Txn, BuyItem, StockItem, ChatMsg, PettyEntry, ReceiptItem, Unit, OpExEntry, OpExCategory, Product, SavedCard, BusinessHoursSettings, OutletSettings, CookingLog,
 } from "@/types";
@@ -39,17 +40,8 @@ import { DEFAULT_OUTLET } from "@/types";
 import { DEFAULT_BUSINESS_HOURS } from "@/features/profile/BusinessHoursView";
 import { OPEX_CATEGORIES, OPEX_EMOJI } from "@/types";
 
-const greeting = () => {
-  const h = new Date().getHours();
-  if (h < 12) return "Selamat Pagi";
-  if (h < 15) return "Selamat Tengah Hari";
-  if (h < 19) return "Selamat Petang";
-  return "Selamat Malam";
-};
-
 const Index = () => {
   const { userId, user, signOut } = useAuth();
-  const language = "ms";
   const [tab, setTab] = useState<Tab>("today");
   const [modalOpen, setModalOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
@@ -619,8 +611,16 @@ const TodayView = ({
   onOpenWaste: () => void; onOpenAutopsy: () => void;
 }) => {
   void onOpenCalc;
+  const { t } = useTranslation();
   const [insight, setInsight] = useState<string | null>(null);
   const todayLabel = new Date().toLocaleDateString("ms-MY", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const greeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return t("greetingMorning");
+    if (h < 15) return t("greetingNoon");
+    if (h < 19) return t("greetingAfternoon");
+    return t("greetingNight");
+  };
   return (
     <div className="px-5 pt-6 space-y-5">
       <header className="animate-fade-in space-y-1">

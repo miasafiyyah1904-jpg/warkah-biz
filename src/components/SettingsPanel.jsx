@@ -24,7 +24,7 @@ function initials(name) {
  * }} props
  */
 export default function SettingsPanel({ open, onClose, profileName, businessName, onSaveProfile, onLogout }) {
-  const { t } = useTranslation();
+  const { t, language, setLanguage } = useTranslation();
   const { theme, setTheme } = useTheme();
   const { userId } = useAuth();
   const [name, setName] = useState(profileName);
@@ -103,6 +103,26 @@ export default function SettingsPanel({ open, onClose, profileName, businessName
                 className={`tap h-12 rounded-2xl font-bold text-sm border ${theme === "dark" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground"}`}
               >
                 🌙 {t("darkMode")}
+              </button>
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">{t("language")}</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setLanguage("ms")}
+                className={`tap h-12 rounded-2xl font-bold text-sm border ${language === "ms" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground"}`}
+              >
+                🇲🇾 Bahasa Melayu
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                className={`tap h-12 rounded-2xl font-bold text-sm border ${language === "en" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground"}`}
+              >
+                🇬🇧 English
               </button>
             </div>
           </section>
