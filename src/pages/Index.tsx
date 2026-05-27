@@ -40,17 +40,16 @@ import { DEFAULT_OUTLET } from "@/types";
 import { DEFAULT_BUSINESS_HOURS } from "@/features/profile/BusinessHoursView";
 import { OPEX_CATEGORIES, OPEX_EMOJI } from "@/types";
 
-const greeting = () => {
-  const h = new Date().getHours();
-  if (h < 12) return "Selamat Pagi";
-  if (h < 15) return "Selamat Tengah Hari";
-  if (h < 19) return "Selamat Petang";
-  return "Selamat Malam";
-};
-
 const Index = () => {
   const { userId, user, signOut } = useAuth();
-  const language = "ms";
+  const { t } = useTranslation();
+  const greeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return t("greetingMorning");
+    if (h < 15) return t("greetingNoon");
+    if (h < 19) return t("greetingAfternoon");
+    return t("greetingNight");
+  };
   const [tab, setTab] = useState<Tab>("today");
   const [modalOpen, setModalOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
