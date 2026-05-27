@@ -42,8 +42,6 @@ import { OPEX_CATEGORIES, OPEX_EMOJI } from "@/types";
 
 const Index = () => {
   const { userId, user, signOut } = useAuth();
-  const { t } = useTranslation();
-  void t;
   const [tab, setTab] = useState<Tab>("today");
   const [modalOpen, setModalOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
