@@ -108,6 +108,26 @@ export default function SettingsPanel({ open, onClose, profileName, businessName
           </section>
 
           <section>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">{t("language")}</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setLanguage("ms")}
+                className={`tap h-12 rounded-2xl font-bold text-sm border ${language === "ms" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground"}`}
+              >
+                🇲🇾 Bahasa Melayu
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                className={`tap h-12 rounded-2xl font-bold text-sm border ${language === "en" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground"}`}
+              >
+                🇬🇧 English
+              </button>
+            </div>
+          </section>
+
+          <section>
             <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">{t("account")}</h3>
             <div className="space-y-2">
               <label className="block text-xs text-muted-foreground">👤 {t("profileName")}</label>
