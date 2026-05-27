@@ -32,6 +32,7 @@ import { emojiForItem } from "@/lib/stockEmoji";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslation } from "@/context/LanguageContext";
 import type {
   Tab, Txn, BuyItem, StockItem, ChatMsg, PettyEntry, ReceiptItem, Unit, OpExEntry, OpExCategory, Product, SavedCard, BusinessHoursSettings, OutletSettings, CookingLog,
 } from "@/types";
