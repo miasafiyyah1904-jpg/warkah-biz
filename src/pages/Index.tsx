@@ -613,8 +613,16 @@ const TodayView = ({
   onOpenWaste: () => void; onOpenAutopsy: () => void;
 }) => {
   void onOpenCalc;
+  const { t } = useTranslation();
   const [insight, setInsight] = useState<string | null>(null);
   const todayLabel = new Date().toLocaleDateString("ms-MY", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const greeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return t("greetingMorning");
+    if (h < 15) return t("greetingNoon");
+    if (h < 19) return t("greetingAfternoon");
+    return t("greetingNight");
+  };
   return (
     <div className="px-5 pt-6 space-y-5">
       <header className="animate-fade-in space-y-1">
