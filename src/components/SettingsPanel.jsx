@@ -24,7 +24,7 @@ function initials(name) {
  * }} props
  */
 export default function SettingsPanel({ open, onClose, profileName, businessName, onSaveProfile, onLogout }) {
-  const { t } = useTranslation();
+  const { t, language, setLanguage } = useTranslation();
   const { theme, setTheme } = useTheme();
   const { userId } = useAuth();
   const [name, setName] = useState(profileName);
