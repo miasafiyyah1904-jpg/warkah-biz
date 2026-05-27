@@ -43,13 +43,7 @@ import { OPEX_CATEGORIES, OPEX_EMOJI } from "@/types";
 const Index = () => {
   const { userId, user, signOut } = useAuth();
   const { t } = useTranslation();
-  const greeting = () => {
-    const h = new Date().getHours();
-    if (h < 12) return t("greetingMorning");
-    if (h < 15) return t("greetingNoon");
-    if (h < 19) return t("greetingAfternoon");
-    return t("greetingNight");
-  };
+  void t;
   const [tab, setTab] = useState<Tab>("today");
   const [modalOpen, setModalOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
