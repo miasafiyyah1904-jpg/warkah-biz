@@ -1,22 +1,58 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import ms from "@/translations/ms.js";
+import en from "@/translations/en.js";
+
+export type Language = "ms" | "en";
+
+const DICTS: Record<Language, Record<string, string>> = {
+  ms: ms as Record<string, string>,
+  en: en as Record<string, string>,
+};
+
+const STORAGE_KEY = "warkahbiz_language";
 
 interface Ctx {
+  language: Language;
+  setLanguage: (lang: Language) => void;
   t: (key: string) => string;
 }
 
-const translations: Record<string, string> = ms;
-
 const LanguageContext = createContext<Ctx | null>(null);
 
+function readInitial(): Language {
+  if (typeof window === "undefined") return "ms";
+  const v = window.localStorage.getItem(STORAGE_KEY);
+  return v === "en" || v === "ms" ? v : "ms";
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const t = (key: string) => translations[key] ?? key;
-  if (typeof document !== "undefined") document.documentElement.lang = "ms";
-  return <LanguageContext.Provider value={{ t }}>{children}</LanguageContext.Provider>;
+  const [language, setLanguageState] = useState<Language>(readInitial);
+
+  useEffect(() => {
+    if (typeof document !== "undefined") document.documentElement.lang = language;
+    if (typeof window !== "undefined") {
+      try { window.localStorage.setItem(STORAGE_KEY, language); } catch {}
+    }
+  }, [language]);
+
+  const setLanguage = (lang: Language) => setLanguageState(lang);
+
+  const dict = DICTS[language] ?? DICTS.ms;
+  const t = (key: string) => dict[key] ?? (DICTS.ms[key] ?? key);
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
 }
 
 export function useTranslation() {
   const ctx = useContext(LanguageContext);
   if (!ctx) throw new Error("useTranslation must be used inside LanguageProvider");
   return ctx;
+}
+
+export function useLanguage() {
+  return useTranslation();
 }
