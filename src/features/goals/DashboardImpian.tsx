@@ -236,7 +236,11 @@ function AddSavingsDialog({
 
   return (
     <Dialog open={!!goal} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="rounded-2xl">
+      <DialogContent
+        className="rounded-2xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Tambah Simpanan</DialogTitle>
           <DialogDescription>
