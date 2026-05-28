@@ -496,11 +496,19 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
               </div>
             ) : (
               <>
+                <div className={`rounded-2xl p-5 text-center ${report.netProfit >= 0 ? "bg-profit/10" : "bg-cost/10"}`}>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Untung Bersih</div>
+                  <div className={`text-4xl font-extrabold mt-2 tabular-nums ${report.netProfit >= 0 ? "text-profit" : "text-cost"}`}>
+                    {rm(report.netProfit)}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">Margin {report.netMargin.toFixed(1)}%</div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-2">
                   <SummaryBox label="Pendapatan" value={rm(report.totalRevenue)} tone="profit" />
                   <SummaryBox label="Perbelanjaan" value={rm(report.totalCogs + report.totalOpex)} tone="cost" />
-                  <SummaryBox label="Untung Bersih" value={rm(report.netProfit)} tone={report.netProfit >= 0 ? "profit" : "cost"} />
-                  <SummaryBox label="Margin" value={`${report.netMargin.toFixed(1)}%`} tone="info" />
+                  <SummaryBox label="Untung Kasar" value={rm(report.grossProfit)} tone="profit" />
+                  <SummaryBox label="Margin Kasar" value={`${report.grossMargin.toFixed(1)}%`} tone="info" />
                 </div>
 
                 <Section title="A. Pendapatan">
