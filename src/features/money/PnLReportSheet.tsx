@@ -526,14 +526,14 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
                   <Row label={`Margin Untung Kasar`} value={`${report.grossMargin.toFixed(2)}%`} />
                 </Section>
 
-                <Section title="C. Kos Operasi">
+                <Section title="C. Perbelanjaan Operasi">
                   <Row label="Utiliti" value={rm(report.opexBreakdown["Utiliti"])} negative />
                   <Row label="Sewa Tapak" value={rm(report.opexBreakdown["Sewa Tapak"])} negative />
                   <Row label="Gaji & Upah" value={rm(report.opexBreakdown["Gaji"])} negative />
                   <Row label="Pengangkutan" value={rm(report.opexBreakdown["Pengangkutan"])} negative />
                   <Row label="Lesen & Permit" value={rm(report.opexBreakdown["Lesen"])} negative />
                   <Row label="Lain-lain" value={rm(report.opexBreakdown["Lain-lain"])} negative />
-                  <Row label="JUMLAH KOS OPERASI" value={rm(report.totalOpex)} negative bold />
+                  <Row label="JUMLAH PERBELANJAAN OPERASI" value={rm(report.totalOpex)} negative bold />
                 </Section>
 
                 <Section title="D. Keuntungan Bersih">
