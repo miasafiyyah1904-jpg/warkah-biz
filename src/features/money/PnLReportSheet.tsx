@@ -17,7 +17,7 @@ interface Props {
 }
 
 type Step = "menu" | "period" | "preview";
-type PeriodKey = "7d" | "30d" | "month" | "3m" | "custom";
+type PeriodKey = "today" | "7d" | "30d" | "month" | "3m" | "1y" | "custom";
 
 const fmt2 = (n: number) => Number(n || 0).toFixed(2);
 const rm = (n: number) => `RM ${Number(n || 0).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -40,10 +40,12 @@ function computeRange(period: PeriodKey, customFrom?: string, customTo?: string)
   const now = new Date();
   const end = new Date(now); end.setHours(23, 59, 59, 999);
   const start = new Date(now); start.setHours(0, 0, 0, 0);
-  if (period === "7d") start.setDate(start.getDate() - 6);
+  if (period === "today") { /* already today */ }
+  else if (period === "7d") start.setDate(start.getDate() - 6);
   else if (period === "30d") start.setDate(start.getDate() - 29);
   else if (period === "month") start.setDate(1);
   else if (period === "3m") start.setMonth(start.getMonth() - 2, 1);
+  else if (period === "1y") start.setFullYear(start.getFullYear() - 1, start.getMonth(), start.getDate() + 1);
   else if (period === "custom") {
     if (customFrom) { const d = new Date(customFrom); d.setHours(0,0,0,0); start.setTime(d.getTime()); }
     if (customTo) { const d = new Date(customTo); d.setHours(23,59,59,999); end.setTime(d.getTime()); }
