@@ -124,7 +124,11 @@ export const CookingLogModal = ({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-[520px] p-0 gap-0 max-h-[92vh] flex flex-col rounded-3xl overflow-hidden">
+      <DialogContent
+        className="max-w-[520px] p-0 gap-0 max-h-[92vh] flex flex-col rounded-3xl overflow-hidden"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader className="px-5 pt-5 pb-3 border-b border-border">
           <DialogTitle className="text-base font-extrabold flex items-center gap-2">
             <ChefHat className="w-5 h-5 text-primary" />
