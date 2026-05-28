@@ -17,7 +17,7 @@ interface Props {
 }
 
 type Step = "menu" | "period" | "preview";
-type PeriodKey = "7d" | "30d" | "month" | "3m" | "custom";
+type PeriodKey = "today" | "7d" | "30d" | "month" | "3m" | "1y" | "custom";
 
 const fmt2 = (n: number) => Number(n || 0).toFixed(2);
 const rm = (n: number) => `RM ${Number(n || 0).toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -40,10 +40,12 @@ function computeRange(period: PeriodKey, customFrom?: string, customTo?: string)
   const now = new Date();
   const end = new Date(now); end.setHours(23, 59, 59, 999);
   const start = new Date(now); start.setHours(0, 0, 0, 0);
-  if (period === "7d") start.setDate(start.getDate() - 6);
+  if (period === "today") { /* already today */ }
+  else if (period === "7d") start.setDate(start.getDate() - 6);
   else if (period === "30d") start.setDate(start.getDate() - 29);
   else if (period === "month") start.setDate(1);
   else if (period === "3m") start.setMonth(start.getMonth() - 2, 1);
+  else if (period === "1y") start.setFullYear(start.getFullYear() - 1, start.getMonth(), start.getDate() + 1);
   else if (period === "custom") {
     if (customFrom) { const d = new Date(customFrom); d.setHours(0,0,0,0); start.setTime(d.getTime()); }
     if (customTo) { const d = new Date(customTo); d.setHours(23,59,59,999); end.setTime(d.getTime()); }
@@ -444,10 +446,12 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
         {step === "period" && (
           <div className="space-y-2">
             {([
+              { k: "today", label: "Hari Ini" },
               { k: "7d", label: "7 Hari" },
               { k: "30d", label: "30 Hari" },
               { k: "month", label: "Bulan Ini" },
               { k: "3m", label: "3 Bulan" },
+              { k: "1y", label: "Setahun" },
               { k: "custom", label: "Pilih Tarikh" },
             ] as const).map(p => (
               <button
@@ -492,11 +496,19 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
               </div>
             ) : (
               <>
+                <div className={`rounded-2xl p-5 text-center ${report.netProfit >= 0 ? "bg-profit/10" : "bg-cost/10"}`}>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Untung Bersih</div>
+                  <div className={`text-4xl font-extrabold mt-2 tabular-nums ${report.netProfit >= 0 ? "text-profit" : "text-cost"}`}>
+                    {rm(report.netProfit)}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">Margin {report.netMargin.toFixed(1)}%</div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-2">
                   <SummaryBox label="Pendapatan" value={rm(report.totalRevenue)} tone="profit" />
                   <SummaryBox label="Perbelanjaan" value={rm(report.totalCogs + report.totalOpex)} tone="cost" />
-                  <SummaryBox label="Untung Bersih" value={rm(report.netProfit)} tone={report.netProfit >= 0 ? "profit" : "cost"} />
-                  <SummaryBox label="Margin" value={`${report.netMargin.toFixed(1)}%`} tone="info" />
+                  <SummaryBox label="Untung Kasar" value={rm(report.grossProfit)} tone="profit" />
+                  <SummaryBox label="Margin Kasar" value={`${report.grossMargin.toFixed(1)}%`} tone="info" />
                 </div>
 
                 <Section title="A. Pendapatan">
@@ -514,14 +526,14 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
                   <Row label={`Margin Untung Kasar`} value={`${report.grossMargin.toFixed(2)}%`} />
                 </Section>
 
-                <Section title="C. Kos Operasi">
+                <Section title="C. Perbelanjaan Operasi">
                   <Row label="Utiliti" value={rm(report.opexBreakdown["Utiliti"])} negative />
                   <Row label="Sewa Tapak" value={rm(report.opexBreakdown["Sewa Tapak"])} negative />
                   <Row label="Gaji & Upah" value={rm(report.opexBreakdown["Gaji"])} negative />
                   <Row label="Pengangkutan" value={rm(report.opexBreakdown["Pengangkutan"])} negative />
                   <Row label="Lesen & Permit" value={rm(report.opexBreakdown["Lesen"])} negative />
                   <Row label="Lain-lain" value={rm(report.opexBreakdown["Lain-lain"])} negative />
-                  <Row label="JUMLAH KOS OPERASI" value={rm(report.totalOpex)} negative bold />
+                  <Row label="JUMLAH PERBELANJAAN OPERASI" value={rm(report.totalOpex)} negative bold />
                 </Section>
 
                 <Section title="D. Keuntungan Bersih">
