@@ -446,10 +446,12 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
         {step === "period" && (
           <div className="space-y-2">
             {([
+              { k: "today", label: "Hari Ini" },
               { k: "7d", label: "7 Hari" },
               { k: "30d", label: "30 Hari" },
               { k: "month", label: "Bulan Ini" },
               { k: "3m", label: "3 Bulan" },
+              { k: "1y", label: "Setahun" },
               { k: "custom", label: "Pilih Tarikh" },
             ] as const).map(p => (
               <button
