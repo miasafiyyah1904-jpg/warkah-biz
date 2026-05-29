@@ -41,6 +41,7 @@ import { DEFAULT_BUSINESS_HOURS } from "@/features/profile/BusinessHoursView";
 import { OPEX_CATEGORIES, OPEX_EMOJI } from "@/types";
 
 const Index = () => {
+  const { t } = useTranslation();
   const { userId, user, signOut } = useAuth();
   const [tab, setTab] = useState<Tab>("today");
   const [modalOpen, setModalOpen] = useState(false);
