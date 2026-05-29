@@ -323,12 +323,12 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
                         ))}
                         {hidden > 0 && (
                           <button onClick={() => toggleShowAll(group.dateKey)} className="w-full px-4 py-2.5 text-xs font-bold text-primary tap">
-                            + Lihat {hidden} lagi
+                            {t("viewMore").replace("{n}", String(hidden))}
                           </button>
                         )}
                         {showAll && items.length > 3 && (
                           <button onClick={() => toggleShowAll(group.dateKey)} className="w-full px-4 py-2.5 text-xs font-bold text-muted-foreground tap">
-                            Tutup
+                            {t("collapse")}
                           </button>
                         )}
                       </div>
