@@ -272,15 +272,15 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
                 onClick={() => setRange(r)}
                 className={`flex-1 h-11 rounded-xl text-xs font-bold tap transition-all duration-150 ${range === r ? "bg-gradient-profit text-profit-foreground shadow-card border-transparent" : "text-muted-foreground"}`}
               >
-                {r === "today" ? "Hari Ini" : r === "week" ? "Minggu Ini" : "Bulan Ini"}
+                {r === "today" ? t("logRangeToday") : r === "week" ? t("logRangeWeek") : t("logRangeMonth")}
               </button>
             ))}
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            <MiniStat label="Masuk"  value={sum.in}     tone="income" />
-            <MiniStat label="Keluar" value={sum.out}    tone="cost" />
-            <MiniStat label="Untung" value={sum.profit} tone="profit" />
+            <MiniStat label={t("colIn")}     value={sum.in}     tone="income" />
+            <MiniStat label={t("colOut")}    value={sum.out}    tone="cost" />
+            <MiniStat label={t("colProfit")} value={sum.profit} tone="profit" />
           </div>
 
           {filter === "in" ? (
