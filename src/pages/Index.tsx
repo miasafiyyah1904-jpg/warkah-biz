@@ -633,14 +633,14 @@ const TodayView = ({
 
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-3xl p-6 bg-gradient-income text-white shadow-card animate-fade-in">
-          <div className="text-xs font-bold uppercase tracking-wider opacity-90">Duit Masuk 💰</div>
+          <div className="text-xs font-bold uppercase tracking-wider opacity-90">{t("moneyIn")}</div>
           <div className="text-3xl font-extrabold mt-3">{fmt(today.in)}</div>
-          <div className="text-[11px] opacity-80 mt-1">Hari ini</div>
+          <div className="text-[11px] opacity-80 mt-1">{t("homeToday")}</div>
         </div>
         <div className="rounded-3xl p-6 bg-gradient-cost text-white shadow-card animate-fade-in">
-          <div className="text-xs font-bold uppercase tracking-wider opacity-90">Duit Keluar 💸</div>
+          <div className="text-xs font-bold uppercase tracking-wider opacity-90">{t("moneyOut")}</div>
           <div className="text-3xl font-extrabold mt-3">{fmt(duitKeluar)}</div>
-          <div className="text-[11px] opacity-80 mt-1">Hari ini</div>
+          <div className="text-[11px] opacity-80 mt-1">{t("homeToday")}</div>
         </div>
       </div>
 
