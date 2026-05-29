@@ -4,12 +4,12 @@ import type { ChatMsg, Txn, StockItem, PettyEntry, OpExEntry } from "@/types";
 import type { BusinessSnapshot } from "./buildSystemPrompt";
 import { useLanguage } from "@/context/LanguageContext";
 
-const QUICK_CHIPS = [
-  "📊 Tunjuk P&L hari ini",
-  "⚖️ Bagaimana untuk dapat break-even",
-  "🏷️ Margin produk saya?",
-  "⚠️ Ada warning cash flow?",
-  "🛒 Stok apa nak habis?",
+const QUICK_CHIP_KEYS = [
+  "chatQuickPnl",
+  "chatQuickBreakeven",
+  "chatQuickMargin",
+  "chatQuickCashflow",
+  "chatQuickStock",
 ];
 
 export const ChatView = ({
