@@ -556,8 +556,8 @@ const Index = () => {
           >
             <span className="text-2xl">📊</span>
             <div className="flex-1 text-left">
-              <p className="text-sm font-extrabold">Laporan Malam Boss dah siap!</p>
-              <p className="text-[11px] opacity-90">Tap untuk lihat ringkasan hari ini</p>
+              <p className="text-sm font-extrabold">{t("nightlyBannerTitle")}</p>
+              <p className="text-[11px] opacity-90">{t("nightlyBannerSub")}</p>
             </div>
             <span
               role="button"
