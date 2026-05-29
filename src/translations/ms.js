@@ -313,4 +313,11 @@ export default {
   bufferHint: "Masa tersembunyi sebelum/selepas waktu operasi",
   hoursSaved: "Tetapan disimpan ✅",
   dayMon: "Isnin", dayTue: "Selasa", dayWed: "Rabu", dayThu: "Khamis", dayFri: "Jumaat", daySat: "Sabtu", daySun: "Ahad",
+  // Chat
+  chatInputPlaceholder: "Tulis soalan Boss...",
+  chatQuickPnl: "📊 Tunjuk P&L hari ini",
+  chatQuickBreakeven: "⚖️ Bagaimana untuk dapat break-even",
+  chatQuickMargin: "🏷️ Margin produk saya?",
+  chatQuickCashflow: "⚠️ Ada warning cash flow?",
+  chatQuickStock: "🛒 Stok apa nak habis?",
 };
