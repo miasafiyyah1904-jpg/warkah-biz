@@ -121,7 +121,7 @@ export const ChatView = ({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit(input)}
-          placeholder="Tulis soalan Boss..."
+          placeholder={t("chatInputPlaceholder")}
           className="flex-1 h-12 px-4 rounded-full bg-surface-elevated border border-border focus:outline-none focus:border-primary text-sm"
         />
         <button disabled={isLoading} onClick={() => submit(input)} className="w-12 h-12 rounded-full bg-gradient-profit text-profit-foreground grid place-items-center tap shadow-card disabled:opacity-50">
