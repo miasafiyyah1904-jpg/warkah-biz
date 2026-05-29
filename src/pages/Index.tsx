@@ -523,11 +523,11 @@ const Index = () => {
 
         <nav className="fixed left-1/2 -translate-x-1/2 bottom-0 w-full max-w-[440px] z-20 bg-surface/90 backdrop-blur-xl border-t border-border">
           <div className="grid grid-cols-5 pt-2 pb-6 px-1">
-            <TabBtn dataTutorial="tab-today" icon={<Home />} label="Hari Ini" active={tab === "today"} onClick={() => setTab("today")} />
-            <TabBtn dataTutorial="tab-bekalan" icon={<Package />} label="Bekalan" active={tab === "bekalan"} onClick={() => setTab("bekalan")} badge={urgentCount || undefined} />
-            <TabBtn dataTutorial="tab-log" icon={<BarChart3 />} label="Rekod" active={tab === "log"} onClick={() => setTab("log")} />
-            <TabBtn dataTutorial="tab-ai" icon={<MessageCircle />} label="Tanya AI" active={tab === "ai"} onClick={() => setTab("ai")} />
-            <TabBtn dataTutorial="tab-profile" icon={<User />} label="Profil" active={tab === "profile"} onClick={() => setTab("profile")} />
+            <TabBtn dataTutorial="tab-today" icon={<Home />} label={t("tabToday")} active={tab === "today"} onClick={() => setTab("today")} />
+            <TabBtn dataTutorial="tab-bekalan" icon={<Package />} label={t("tabSupplies")} active={tab === "bekalan"} onClick={() => setTab("bekalan")} badge={urgentCount || undefined} />
+            <TabBtn dataTutorial="tab-log" icon={<BarChart3 />} label={t("tabRecord")} active={tab === "log"} onClick={() => setTab("log")} />
+            <TabBtn dataTutorial="tab-ai" icon={<MessageCircle />} label={t("tabAskAI")} active={tab === "ai"} onClick={() => setTab("ai")} />
+            <TabBtn dataTutorial="tab-profile" icon={<User />} label={t("tabProfile")} active={tab === "profile"} onClick={() => setTab("profile")} />
           </div>
         </nav>
 
