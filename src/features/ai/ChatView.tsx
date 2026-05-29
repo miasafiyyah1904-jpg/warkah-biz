@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Bot, Send, Trash2 } from "lucide-react";
 import type { ChatMsg, Txn, StockItem, PettyEntry, OpExEntry } from "@/types";
 import type { BusinessSnapshot } from "./buildSystemPrompt";
+import { useLanguage } from "@/context/LanguageContext";
 
 const QUICK_CHIPS = [
   "📊 Tunjuk P&L hari ini",
@@ -27,10 +28,11 @@ export const ChatView = ({
   const [input, setInput] = useState("");
   const [confirmClear, setConfirmClear] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { language } = useLanguage();
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, isLoading]);
   const submit = (text: string) => {
     if (!text.trim() || isLoading) return;
-    onSend(text, { txns, stock, opex, petty, businessName });
+    onSend(text, { txns, stock, opex, petty, businessName, language });
     setInput("");
   };
 

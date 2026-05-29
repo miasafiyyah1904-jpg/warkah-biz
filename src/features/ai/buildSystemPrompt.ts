@@ -1,15 +1,18 @@
 import type { Txn, StockItem, PettyEntry } from "@/types";
 import type { OpExEntry } from "@/types";
 
+export type PromptLanguage = "ms" | "en";
+
 export interface BusinessSnapshot {
   txns: Txn[];
   stock: StockItem[];
   opex: OpExEntry[];
   petty: PettyEntry[];
   businessName: string;
+  language?: PromptLanguage;
 }
 
-export function buildSystemPrompt(data: BusinessSnapshot): string {
+export function buildSystemPrompt(data: BusinessSnapshot, language: PromptLanguage = data.language ?? "ms"): string {
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const weekStart = todayStart - 6 * 24 * 60 * 60 * 1000;
@@ -36,60 +39,109 @@ export function buildSystemPrompt(data: BusinessSnapshot): string {
   const weekExpRatio   = weekSales > 0 ? ((weekExpenses / weekSales) * 100).toFixed(1) : "0";
   const pettyBalance   = data.petty[data.petty.length - 1]?.balance ?? 0;
 
+  const isEn = language === "en";
+  const locale = isEn ? "en-MY" : "ms-MY";
+
+  const L = isEn
+    ? {
+        lowStock: " ⚠️ LOW",
+        noStock: "  (no stock recorded)",
+        replyInstr: "Reply in simple English.",
+        suggestion: "Suggestion",
+        warnExpRatio: (r: string) => `⚠️ This week's expense ratio ${r}% — too high (limit: 70%)`,
+        warnLowStock: (n: string) => `⚠️ Stock running low: ${n}`,
+        warnNoAfternoon: "⚠️ No sales after 2PM today",
+        warnPetty: (b: string) => `⚠️ Petty Cash balance low: RM ${b}`,
+        business: "Business",
+        date: "Date",
+        todayHeader: "=== TODAY'S DATA ===",
+        grossSales: "Gross Sales:",
+        cogs: "Material Cost (COGS):",
+        grossProfit: "Gross Profit:",
+        utilities: "Utilities:",
+        packaging: "Packaging:",
+        salary: "Salary:",
+        transport: "Transport:",
+        other: "Other:",
+        totalOpex: "TOTAL OPERATING COST:",
+        netProfit: "Net Profit:",
+        margin: "margin",
+        thisWeek: "THIS WEEK:",
+        sales: "Sales",
+        expenses: "Expenses",
+        ratio: "Ratio",
+        stock: "STOCK:",
+        petty: "PETTY CASH:",
+        activeWarnings: "=== ACTIVE WARNINGS ===",
+        noWarnings: "=== No warnings — finances stable ===",
+        rulesHeader: "=== CALCULATION RULES ===",
+      }
+    : {
+        lowStock: " ⚠️ RENDAH",
+        noStock: "  (tiada stok direkod)",
+        replyInstr: "Reply in simple Malay.",
+        suggestion: "Cadangan",
+        warnExpRatio: (r: string) => `⚠️ Nisbah perbelanjaan minggu ini ${r}% — terlalu tinggi (had: 70%)`,
+        warnLowStock: (n: string) => `⚠️ Stok hampir habis: ${n}`,
+        warnNoAfternoon: "⚠️ Tiada jualan selepas 2PM hari ini",
+        warnPetty: (b: string) => `⚠️ Baki Petty Cash rendah: RM ${b}`,
+        business: "Perniagaan",
+        date: "Tarikh",
+        todayHeader: "=== DATA HARI INI ===",
+        grossSales: "Jualan Kasar:",
+        cogs: "Kos Bahan (COGS):",
+        grossProfit: "Untung Kasar:",
+        utilities: "Utiliti:",
+        packaging: "Pembungkusan:",
+        salary: "Gaji:",
+        transport: "Pengangkutan:",
+        other: "Lain-lain:",
+        totalOpex: "JUMLAH KOS OPERASI:",
+        netProfit: "Untung Bersih:",
+        margin: "margin",
+        thisWeek: "MINGGU INI:",
+        sales: "Jualan",
+        expenses: "Perbelanjaan",
+        ratio: "Nisbah",
+        stock: "STOK:",
+        petty: "PETTY CASH:",
+        activeWarnings: "=== AMARAN AKTIF ===",
+        noWarnings: "=== Tiada amaran — kewangan stabil ===",
+        rulesHeader: "=== PERATURAN KIRAAN ===",
+      };
+
   const lowStock = data.stock.filter(s => s.qty <= s.restockQty);
   const stockLines = data.stock.length > 0
-    ? data.stock.map(s => `  ${s.emoji} ${s.name}: ${s.qty}${s.unit} (min restock: ${s.restockQty}${s.unit})${s.qty <= s.restockQty ? " ⚠️ RENDAH" : ""}`).join("\n")
-    : "  (tiada stok direkod)";
+    ? data.stock.map(s => `  ${s.emoji} ${s.name}: ${s.qty}${s.unit} (min restock: ${s.restockQty}${s.unit})${s.qty <= s.restockQty ? L.lowStock : ""}`).join("\n")
+    : L.noStock;
 
   const lastSale = todayTxns.filter(t => t.type === "in").sort((a, b) => b.ts - a.ts)[0];
   const lastSaleHour = lastSale ? new Date(lastSale.ts).getHours() : -1;
 
   const warnings: string[] = [];
-  if (weekSales > 0 && parseFloat(weekExpRatio) > 70)
-    warnings.push(`⚠️ Nisbah perbelanjaan minggu ini ${weekExpRatio}% — terlalu tinggi (had: 70%)`);
-  if (lowStock.length > 0)
-    warnings.push(`⚠️ Stok hampir habis: ${lowStock.map(s => s.name).join(", ")}`);
-  if (todaySales > 0 && lastSaleHour >= 0 && lastSaleHour < 14 && now.getHours() >= 14)
-    warnings.push(`⚠️ Tiada jualan selepas 2PM hari ini`);
-  if (pettyBalance < 20 && data.petty.length > 0)
-    warnings.push(`⚠️ Baki Petty Cash rendah: RM ${pettyBalance.toFixed(2)}`);
+  if (weekSales > 0 && parseFloat(weekExpRatio) > 70) warnings.push(L.warnExpRatio(weekExpRatio));
+  if (lowStock.length > 0) warnings.push(L.warnLowStock(lowStock.map(s => s.name).join(", ")));
+  if (todaySales > 0 && lastSaleHour >= 0 && lastSaleHour < 14 && now.getHours() >= 14) warnings.push(L.warnNoAfternoon);
+  if (pettyBalance < 20 && data.petty.length > 0) warnings.push(L.warnPetty(pettyBalance.toFixed(2)));
 
- return `You are WarkahBiz AI, a sharp financial assistant for a Malaysian micro F&B business. Rules:
-- Reply in simple Malay. Max 4–6 lines per response. No long paragraphs.
-- Lead with the direct answer or key number. Skip greetings and filler.
-- Use **bold** only for the most important figure (1–2 per reply max).
-- For calculations, show only the final breakdown — no step-by-step explanation unless asked.
-- End every reply with ONE line: "💡 Cadangan: [konkrit, spesifik]"
-- If there are active warnings, mention them in one line at the end only.
+  const rulesBody = isEn
+    ? `1. DAILY P&L — when asked profit/loss/P&L:
+   Gross Profit = Gross Sales − COGS
+   Net Profit = Gross Profit − Total Operating Cost (excluding COGS)
+   Show the full breakdown.
 
-Perniagaan: ${data.businessName || "WarkahBiz"}
-Tarikh: ${now.toLocaleDateString("ms-MY", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+2. BREAK-EVEN — when asked about minimum sales/payback:
+   Monthly Break-even = Fixed Cost ÷ (Margin% / 100)
+   Daily Break-even = Monthly ÷ operating days
+   If no data, estimate from today's data.
 
-=== DATA HARI INI ===
-Jualan Kasar:      RM ${todaySales.toFixed(2)}
-Kos Bahan (COGS):  RM ${cogsToday.toFixed(2)}
-Untung Kasar:      RM ${grossProfit.toFixed(2)} (margin: ${grossMarginPct}%)
-Utiliti:           RM ${utilitiToday.toFixed(2)}
-Pembungkusan:      RM ${bungkusToday.toFixed(2)}
-Gaji:              RM ${gajiToday.toFixed(2)}
-Pengangkutan:      RM ${transportToday.toFixed(2)}
-Lain-lain:         RM ${lainToday.toFixed(2)}
-JUMLAH KOS OPERASI: RM ${totalOpex.toFixed(2)}
-Untung Bersih:     RM ${netProfit.toFixed(2)}
+3. PRODUCT MARGIN — when asked profit per unit/product:
+   Profit per Unit = Selling Price − Total Cost per Unit
+   Margin% = (Profit ÷ Selling Price) × 100
 
-MINGGU INI:
-Jualan: RM ${weekSales.toFixed(2)} | Perbelanjaan: RM ${weekExpenses.toFixed(2)} | Nisbah: ${weekExpRatio}%
-
-STOK:
-${stockLines}
-
-PETTY CASH: RM ${pettyBalance.toFixed(2)}
-
-${warnings.length > 0 ? `=== AMARAN AKTIF ===\n${warnings.join("\n")}` : "=== Tiada amaran — kewangan stabil ==="}
-
-=== PERATURAN KIRAAN ===
-
-1. P&L HARIAN — bila ditanya untung/rugi/P&L:
+4. CASH FLOW WARNINGS — check EVERY reply:
+   If there are active warnings above, MUST mention them at the end.`
+    : `1. P&L HARIAN — bila ditanya untung/rugi/P&L:
    Untung Kasar = Jualan Kasar − COGS
    Untung Bersih = Untung Kasar − Jumlah Kos Operasi (tidak termasuk COGS)
    Tunjuk pecahan lengkap.
@@ -105,4 +157,41 @@ ${warnings.length > 0 ? `=== AMARAN AKTIF ===\n${warnings.join("\n")}` : "=== Ti
 
 4. AMARAN CASH FLOW — semak SETIAP jawapan:
    Jika ada amaran aktif di atas, WAJIB sebut di hujung jawapan.`;
+
+ return `You are WarkahBiz AI, a sharp financial assistant for a Malaysian micro F&B business. Rules:
+- ${L.replyInstr} Max 4–6 lines per response. No long paragraphs.
+- Lead with the direct answer or key number. Skip greetings and filler.
+- Use **bold** only for the most important figure (1–2 per reply max).
+- For calculations, show only the final breakdown — no step-by-step explanation unless asked.
+- End every reply with ONE line: "💡 ${L.suggestion}: [concrete, specific]"
+- If there are active warnings, mention them in one line at the end only.
+
+${L.business}: ${data.businessName || "WarkahBiz"}
+${L.date}: ${now.toLocaleDateString(locale, { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+
+${L.todayHeader}
+${L.grossSales}      RM ${todaySales.toFixed(2)}
+${L.cogs}  RM ${cogsToday.toFixed(2)}
+${L.grossProfit}      RM ${grossProfit.toFixed(2)} (${L.margin}: ${grossMarginPct}%)
+${L.utilities}           RM ${utilitiToday.toFixed(2)}
+${L.packaging}      RM ${bungkusToday.toFixed(2)}
+${L.salary}              RM ${gajiToday.toFixed(2)}
+${L.transport}      RM ${transportToday.toFixed(2)}
+${L.other}         RM ${lainToday.toFixed(2)}
+${L.totalOpex} RM ${totalOpex.toFixed(2)}
+${L.netProfit}     RM ${netProfit.toFixed(2)}
+
+${L.thisWeek}
+${L.sales}: RM ${weekSales.toFixed(2)} | ${L.expenses}: RM ${weekExpenses.toFixed(2)} | ${L.ratio}: ${weekExpRatio}%
+
+${L.stock}
+${stockLines}
+
+${L.petty} RM ${pettyBalance.toFixed(2)}
+
+${warnings.length > 0 ? `${L.activeWarnings}\n${warnings.join("\n")}` : L.noWarnings}
+
+${L.rulesHeader}
+
+${rulesBody}`;
 }
