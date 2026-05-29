@@ -234,15 +234,15 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
     <div className="px-5 pt-6 pb-28 space-y-5">
       <header className="flex items-start justify-between animate-fade-in">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Rekod Kewangan 📊</h1>
-          <p className="text-sm text-muted-foreground mt-1">Semua transaksi</p>
+          <h1 className="text-2xl font-extrabold tracking-tight">{t("recordsTitle")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("recordsSubtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={onExportReport} className="h-10 px-3 rounded-full bg-primary text-primary-foreground text-sm font-semibold tap flex items-center gap-1.5">
-            <FileText className="w-4 h-4" /> Laporan
+            <FileText className="w-4 h-4" /> {t("reportBtn")}
           </button>
           <button onClick={onExport} className="h-10 px-3 rounded-full bg-surface border border-border text-sm font-semibold tap flex items-center gap-1.5">
-            <Share2 className="w-4 h-4" /> Export
+            <Share2 className="w-4 h-4" /> {t("exportBtn")}
           </button>
         </div>
       </header>
