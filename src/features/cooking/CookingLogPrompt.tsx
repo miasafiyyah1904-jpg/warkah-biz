@@ -1,5 +1,6 @@
 import { ChefHat, ChevronRight } from "lucide-react";
 import type { CookingLog } from "@/types";
+import { useTranslation } from "@/context/LanguageContext";
 
 export const CookingLogPrompt = ({
   logs,
@@ -8,6 +9,7 @@ export const CookingLogPrompt = ({
   logs: CookingLog[];
   onOpen: () => void;
 }) => {
+  const { t } = useTranslation();
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const todayLogs = logs.filter((l) => l.ts >= todayStart.getTime());
@@ -24,14 +26,16 @@ export const CookingLogPrompt = ({
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-[10px] uppercase tracking-wider font-bold text-primary">
-            Log Masakan Harian
+            {t("cookingLogHeader")}
           </div>
           <div className="font-extrabold text-base mt-0.5">
-            {todayLogs.length === 0 ? "Apa yang dimasak hari ini? 🍳" : `${totalBatches} batch direkodkan hari ini ✅`}
+            {todayLogs.length === 0
+              ? t("cookingLogPromptEmpty")
+              : t("cookingLogPromptDone").replace("{n}", String(totalBatches))}
           </div>
           <div className="text-[11px] text-muted-foreground mt-0.5">
             {todayLogs.length === 0
-              ? "Tap untuk log & auto-tolak stok"
+              ? t("cookingLogTipEmpty")
               : todayLogs.map((l) => `${l.productEmoji} ${l.batches}×${l.productName}`).join(" • ")}
           </div>
         </div>

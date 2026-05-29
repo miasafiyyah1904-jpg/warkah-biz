@@ -3,6 +3,7 @@ import { Share2, Coins, ChevronDown, ChevronRight, FileText } from "lucide-react
 import type { PettyEntry, Txn, OpExEntry, OpExCategory } from "@/types";
 import { OPEX_CATEGORIES, OPEX_EMOJI } from "@/types";
 import { fmt } from "@/lib/format";
+import { useTranslation } from "@/context/LanguageContext";
 import { PettyInputSheet } from "./PettyInputSheet";
 import { OpExInputSheet } from "./OpExInputSheet";
 
@@ -68,6 +69,8 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
   pettyMonthlyLimit: number;
   onSavePettyLimit: (n: number) => void;
 }) => {
+  const { t, language } = useTranslation();
+  const dateLocale = language === "en" ? "en-MY" : "ms-MY";
   const [range, setRange] = useState<"today" | "week" | "month">("today");
   const [filter, setFilter] = useState<Filter>("all");
   const [pettySheet, setPettySheet] = useState<null | "in" | "out">(null);
@@ -113,7 +116,7 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
     txns.filter(t => t.type === "in").forEach(t => {
       const d = dateOf(t.createdAt, t.ts);
       const key = d.toISOString().slice(0, 10);
-      const label = d.toLocaleDateString("ms-MY", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+      const label = d.toLocaleDateString(dateLocale, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
       const cur = map.get(key) ?? { dateKey: key, label, total: 0, items: [] };
       cur.total += t.amount;
       cur.items.push(t);
@@ -130,7 +133,7 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
     subset.forEach(t => {
       const d = dateOf(t.createdAt, t.ts);
       const key = d.toISOString().slice(0, 10);
-      const label = d.toLocaleDateString("ms-MY", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+      const label = d.toLocaleDateString(dateLocale, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
       const cur = map.get(key) ?? { dateKey: key, label, items: [], peribadi: [] };
       if (isPeribadi(t.label, t.emoji)) cur.peribadi.push(t);
       else cur.items.push(t);
@@ -231,15 +234,15 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
     <div className="px-5 pt-6 pb-28 space-y-5">
       <header className="flex items-start justify-between animate-fade-in">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Rekod Kewangan 📊</h1>
-          <p className="text-sm text-muted-foreground mt-1">Semua transaksi</p>
+          <h1 className="text-2xl font-extrabold tracking-tight">{t("recordsTitle")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("recordsSubtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={onExportReport} className="h-10 px-3 rounded-full bg-primary text-primary-foreground text-sm font-semibold tap flex items-center gap-1.5">
-            <FileText className="w-4 h-4" /> Laporan
+            <FileText className="w-4 h-4" /> {t("reportBtn")}
           </button>
           <button onClick={onExport} className="h-10 px-3 rounded-full bg-surface border border-border text-sm font-semibold tap flex items-center gap-1.5">
-            <Share2 className="w-4 h-4" /> Export
+            <Share2 className="w-4 h-4" /> {t("exportBtn")}
           </button>
         </div>
       </header>
@@ -269,23 +272,23 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
                 onClick={() => setRange(r)}
                 className={`flex-1 h-11 rounded-xl text-xs font-bold tap transition-all duration-150 ${range === r ? "bg-gradient-profit text-profit-foreground shadow-card border-transparent" : "text-muted-foreground"}`}
               >
-                {r === "today" ? "Hari Ini" : r === "week" ? "Minggu Ini" : "Bulan Ini"}
+                {r === "today" ? t("logRangeToday") : r === "week" ? t("logRangeWeek") : t("logRangeMonth")}
               </button>
             ))}
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            <MiniStat label="Masuk"  value={sum.in}     tone="income" />
-            <MiniStat label="Keluar" value={sum.out}    tone="cost" />
-            <MiniStat label="Untung" value={sum.profit} tone="profit" />
+            <MiniStat label={t("colIn")}     value={sum.in}     tone="income" />
+            <MiniStat label={t("colOut")}    value={sum.out}    tone="cost" />
+            <MiniStat label={t("colProfit")} value={sum.profit} tone="profit" />
           </div>
 
           {filter === "in" ? (
             <section className="space-y-3">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">Jualan Mengikut Tarikh</h2>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">{t("salesByDateHeader")}</h2>
               {salesByDate.length === 0 ? (
                 <div className="rounded-2xl p-6 bg-surface border border-dashed border-border text-center text-sm text-muted-foreground">
-                  Tiada jualan direkod.
+                  {t("noSalesRecorded")}
                 </div>
               ) : (
                 salesByDate.map((group, gi) => {
@@ -320,12 +323,12 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
                         ))}
                         {hidden > 0 && (
                           <button onClick={() => toggleShowAll(group.dateKey)} className="w-full px-4 py-2.5 text-xs font-bold text-primary tap">
-                            + Lihat {hidden} lagi
+                            {t("viewMore").replace("{n}", String(hidden))}
                           </button>
                         )}
                         {showAll && items.length > 3 && (
                           <button onClick={() => toggleShowAll(group.dateKey)} className="w-full px-4 py-2.5 text-xs font-bold text-muted-foreground tap">
-                            Tutup
+                            {t("collapse")}
                           </button>
                         )}
                       </div>
@@ -337,10 +340,10 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
             </section>
           ) : (
             <section className="space-y-3">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">Transaksi Mengikut Tarikh</h2>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">{t("txnsByDateHeader")}</h2>
               {txnsByDate.length === 0 ? (
                 <div className="rounded-2xl p-6 bg-surface border border-dashed border-border text-center text-sm text-muted-foreground">
-                  Tiada transaksi direkod.
+                  {t("noTxnsRecorded")}
                 </div>
               ) : (
                 txnsByDate.map((group, gi) => {
@@ -381,12 +384,12 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
                         ))}
                         {hidden > 0 && (
                           <button onClick={() => toggleShowAll(group.dateKey)} className="w-full px-4 py-2.5 text-xs font-bold text-primary tap">
-                            + Lihat {hidden} lagi
+                            {t("viewMore").replace("{n}", String(hidden))}
                           </button>
                         )}
                         {showAll && group.items.length > 3 && (
                           <button onClick={() => toggleShowAll(group.dateKey)} className="w-full px-4 py-2.5 text-xs font-bold text-muted-foreground tap">
-                            Tutup
+                            {t("collapse")}
                           </button>
                         )}
                         {group.peribadi.length > 0 && (

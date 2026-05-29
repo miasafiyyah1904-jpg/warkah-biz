@@ -42,6 +42,7 @@ import { OPEX_CATEGORIES, OPEX_EMOJI } from "@/types";
 
 const Index = () => {
   const { userId, user, signOut } = useAuth();
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("today");
   const [modalOpen, setModalOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
@@ -522,11 +523,11 @@ const Index = () => {
 
         <nav className="fixed left-1/2 -translate-x-1/2 bottom-0 w-full max-w-[440px] z-20 bg-surface/90 backdrop-blur-xl border-t border-border">
           <div className="grid grid-cols-5 pt-2 pb-6 px-1">
-            <TabBtn dataTutorial="tab-today" icon={<Home />} label="Hari Ini" active={tab === "today"} onClick={() => setTab("today")} />
-            <TabBtn dataTutorial="tab-bekalan" icon={<Package />} label="Bekalan" active={tab === "bekalan"} onClick={() => setTab("bekalan")} badge={urgentCount || undefined} />
-            <TabBtn dataTutorial="tab-log" icon={<BarChart3 />} label="Rekod" active={tab === "log"} onClick={() => setTab("log")} />
-            <TabBtn dataTutorial="tab-ai" icon={<MessageCircle />} label="Tanya AI" active={tab === "ai"} onClick={() => setTab("ai")} />
-            <TabBtn dataTutorial="tab-profile" icon={<User />} label="Profil" active={tab === "profile"} onClick={() => setTab("profile")} />
+            <TabBtn dataTutorial="tab-today" icon={<Home />} label={t("tabToday")} active={tab === "today"} onClick={() => setTab("today")} />
+            <TabBtn dataTutorial="tab-bekalan" icon={<Package />} label={t("tabSupplies")} active={tab === "bekalan"} onClick={() => setTab("bekalan")} badge={urgentCount || undefined} />
+            <TabBtn dataTutorial="tab-log" icon={<BarChart3 />} label={t("tabRecord")} active={tab === "log"} onClick={() => setTab("log")} />
+            <TabBtn dataTutorial="tab-ai" icon={<MessageCircle />} label={t("tabAskAI")} active={tab === "ai"} onClick={() => setTab("ai")} />
+            <TabBtn dataTutorial="tab-profile" icon={<User />} label={t("tabProfile")} active={tab === "profile"} onClick={() => setTab("profile")} />
           </div>
         </nav>
 
@@ -555,8 +556,8 @@ const Index = () => {
           >
             <span className="text-2xl">📊</span>
             <div className="flex-1 text-left">
-              <p className="text-sm font-extrabold">Laporan Malam Boss dah siap!</p>
-              <p className="text-[11px] opacity-90">Tap untuk lihat ringkasan hari ini</p>
+              <p className="text-sm font-extrabold">{t("nightlyBannerTitle")}</p>
+              <p className="text-[11px] opacity-90">{t("nightlyBannerSub")}</p>
             </div>
             <span
               role="button"
@@ -611,9 +612,10 @@ const TodayView = ({
   onOpenWaste: () => void; onOpenAutopsy: () => void;
 }) => {
   void onOpenCalc;
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [insight, setInsight] = useState<string | null>(null);
-  const todayLabel = new Date().toLocaleDateString("ms-MY", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const dateLocale = language === "en" ? "en-MY" : "ms-MY";
+  const todayLabel = new Date().toLocaleDateString(dateLocale, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const greeting = () => {
     const h = new Date().getHours();
     if (h < 12) return t("greetingMorning");
@@ -631,41 +633,41 @@ const TodayView = ({
 
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-3xl p-6 bg-gradient-income text-white shadow-card animate-fade-in">
-          <div className="text-xs font-bold uppercase tracking-wider opacity-90">Duit Masuk 💰</div>
+          <div className="text-xs font-bold uppercase tracking-wider opacity-90">{t("moneyIn")}</div>
           <div className="text-3xl font-extrabold mt-3">{fmt(today.in)}</div>
-          <div className="text-[11px] opacity-80 mt-1">Hari ini</div>
+          <div className="text-[11px] opacity-80 mt-1">{t("homeToday")}</div>
         </div>
         <div className="rounded-3xl p-6 bg-gradient-cost text-white shadow-card animate-fade-in">
-          <div className="text-xs font-bold uppercase tracking-wider opacity-90">Duit Keluar 💸</div>
+          <div className="text-xs font-bold uppercase tracking-wider opacity-90">{t("moneyOut")}</div>
           <div className="text-3xl font-extrabold mt-3">{fmt(duitKeluar)}</div>
-          <div className="text-[11px] opacity-80 mt-1">Hari ini</div>
+          <div className="text-[11px] opacity-80 mt-1">{t("homeToday")}</div>
         </div>
       </div>
 
       <CookingLogPrompt logs={cookingLog} onOpen={onOpenCookingLog} />
 
       <section className="space-y-3 animate-fade-in">
-        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider px-1">Alat AI Boss 🤖</h2>
+        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider px-1">{t("toolsAiHeader")}</h2>
         <div className="grid grid-cols-2 gap-3">
           <button onClick={onOpenGoals} className="rounded-2xl p-4 bg-surface border border-border tap text-left space-y-1 hover:border-primary/40 transition-colors">
             <Target className="w-6 h-6 text-primary" />
-            <div className="font-bold text-sm">Sasaran</div>
-            <div className="text-xs text-muted-foreground">Set & jejak matlamat</div>
+            <div className="font-bold text-sm">{t("toolGoals")}</div>
+            <div className="text-xs text-muted-foreground">{t("toolGoalsDesc")}</div>
           </button>
           <button onClick={onOpenForecast} className="rounded-2xl p-4 bg-surface border border-border tap text-left space-y-1 hover:border-primary/40 transition-colors">
             <LineChart className="w-6 h-6 text-primary" />
-            <div className="font-bold text-sm">Ramalan Jualan</div>
-            <div className="text-xs text-muted-foreground">Jangkaan minggu ini</div>
+            <div className="font-bold text-sm">{t("toolForecast")}</div>
+            <div className="text-xs text-muted-foreground">{t("toolForecastDesc")}</div>
           </button>
           <button onClick={onOpenWaste} className="rounded-2xl p-4 bg-surface border border-border tap text-left space-y-1 hover:border-primary/40 transition-colors">
             <Trash2 className="w-6 h-6 text-primary" />
-            <div className="font-bold text-sm">Laporan Sisa &amp; Corak Jualan</div>
-            <div className="text-xs text-muted-foreground">Rekod sisa &amp; AI kesan corak</div>
+            <div className="font-bold text-sm">{t("toolWaste")}</div>
+            <div className="text-xs text-muted-foreground">{t("toolWasteDesc")}</div>
           </button>
           <button onClick={onOpenAutopsy} className="rounded-2xl p-4 bg-surface border border-border tap text-left space-y-1 hover:border-primary/40 transition-colors">
             <FileText className="w-6 h-6 text-primary" />
-            <div className="font-bold text-sm">Laporan Malam</div>
-            <div className="text-xs text-muted-foreground">Ringkasan harian + AI + sejarah</div>
+            <div className="font-bold text-sm">{t("toolNightly")}</div>
+            <div className="text-xs text-muted-foreground">{t("toolNightlyDesc")}</div>
           </button>
         </div>
       </section>
@@ -676,9 +678,9 @@ const TodayView = ({
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
           <div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-sm bg-surface rounded-3xl p-6 animate-pop-in">
             <div className="text-3xl">💡</div>
-            <h3 className="font-extrabold text-lg mt-2">Tips dari WarkahBiz</h3>
+            <h3 className="font-extrabold text-lg mt-2">{t("tipsTitle")}</h3>
             <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{insight}</p>
-            <button onClick={() => setInsight(null)} className="mt-5 w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold tap">Faham, terima kasih!</button>
+            <button onClick={() => setInsight(null)} className="mt-5 w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold tap">{t("tipsOk")}</button>
           </div>
         </div>
       )}
