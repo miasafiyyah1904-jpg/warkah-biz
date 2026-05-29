@@ -647,27 +647,27 @@ const TodayView = ({
       <CookingLogPrompt logs={cookingLog} onOpen={onOpenCookingLog} />
 
       <section className="space-y-3 animate-fade-in">
-        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider px-1">Alat AI Boss 🤖</h2>
+        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider px-1">{t("toolsAiHeader")}</h2>
         <div className="grid grid-cols-2 gap-3">
           <button onClick={onOpenGoals} className="rounded-2xl p-4 bg-surface border border-border tap text-left space-y-1 hover:border-primary/40 transition-colors">
             <Target className="w-6 h-6 text-primary" />
-            <div className="font-bold text-sm">Sasaran</div>
-            <div className="text-xs text-muted-foreground">Set & jejak matlamat</div>
+            <div className="font-bold text-sm">{t("toolGoals")}</div>
+            <div className="text-xs text-muted-foreground">{t("toolGoalsDesc")}</div>
           </button>
           <button onClick={onOpenForecast} className="rounded-2xl p-4 bg-surface border border-border tap text-left space-y-1 hover:border-primary/40 transition-colors">
             <LineChart className="w-6 h-6 text-primary" />
-            <div className="font-bold text-sm">Ramalan Jualan</div>
-            <div className="text-xs text-muted-foreground">Jangkaan minggu ini</div>
+            <div className="font-bold text-sm">{t("toolForecast")}</div>
+            <div className="text-xs text-muted-foreground">{t("toolForecastDesc")}</div>
           </button>
           <button onClick={onOpenWaste} className="rounded-2xl p-4 bg-surface border border-border tap text-left space-y-1 hover:border-primary/40 transition-colors">
             <Trash2 className="w-6 h-6 text-primary" />
-            <div className="font-bold text-sm">Laporan Sisa &amp; Corak Jualan</div>
-            <div className="text-xs text-muted-foreground">Rekod sisa &amp; AI kesan corak</div>
+            <div className="font-bold text-sm">{t("toolWaste")}</div>
+            <div className="text-xs text-muted-foreground">{t("toolWasteDesc")}</div>
           </button>
           <button onClick={onOpenAutopsy} className="rounded-2xl p-4 bg-surface border border-border tap text-left space-y-1 hover:border-primary/40 transition-colors">
             <FileText className="w-6 h-6 text-primary" />
-            <div className="font-bold text-sm">Laporan Malam</div>
-            <div className="text-xs text-muted-foreground">Ringkasan harian + AI + sejarah</div>
+            <div className="font-bold text-sm">{t("toolNightly")}</div>
+            <div className="text-xs text-muted-foreground">{t("toolNightlyDesc")}</div>
           </button>
         </div>
       </section>
