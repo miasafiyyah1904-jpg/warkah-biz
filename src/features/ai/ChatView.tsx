@@ -106,11 +106,14 @@ export const ChatView = ({
       )}
 
       <div className="px-3 pb-2 flex gap-2 overflow-x-auto no-scrollbar">
-        {QUICK_CHIPS.map(c => (
-          <button key={c} onClick={() => submit(c)} className="shrink-0 h-9 px-3 rounded-full bg-surface border border-border text-xs font-semibold text-muted-foreground tap">
-            {c}
-          </button>
-        ))}
+        {QUICK_CHIP_KEYS.map((key) => {
+          const label = t(key);
+          return (
+            <button key={key} onClick={() => submit(label)} className="shrink-0 h-9 px-3 rounded-full bg-surface border border-border text-xs font-semibold text-muted-foreground tap">
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="px-3 pb-3 flex items-center gap-2">
