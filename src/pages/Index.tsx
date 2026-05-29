@@ -612,9 +612,10 @@ const TodayView = ({
   onOpenWaste: () => void; onOpenAutopsy: () => void;
 }) => {
   void onOpenCalc;
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [insight, setInsight] = useState<string | null>(null);
-  const todayLabel = new Date().toLocaleDateString("ms-MY", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const dateLocale = language === "en" ? "en-MY" : "ms-MY";
+  const todayLabel = new Date().toLocaleDateString(dateLocale, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const greeting = () => {
     const h = new Date().getHours();
     if (h < 12) return t("greetingMorning");
