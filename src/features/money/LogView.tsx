@@ -116,7 +116,7 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
     txns.filter(t => t.type === "in").forEach(t => {
       const d = dateOf(t.createdAt, t.ts);
       const key = d.toISOString().slice(0, 10);
-      const label = d.toLocaleDateString("ms-MY", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+      const label = d.toLocaleDateString(dateLocale, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
       const cur = map.get(key) ?? { dateKey: key, label, total: 0, items: [] };
       cur.total += t.amount;
       cur.items.push(t);
