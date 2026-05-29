@@ -69,6 +69,8 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
   pettyMonthlyLimit: number;
   onSavePettyLimit: (n: number) => void;
 }) => {
+  const { t, language } = useTranslation();
+  const dateLocale = language === "en" ? "en-MY" : "ms-MY";
   const [range, setRange] = useState<"today" | "week" | "month">("today");
   const [filter, setFilter] = useState<Filter>("all");
   const [pettySheet, setPettySheet] = useState<null | "in" | "out">(null);
