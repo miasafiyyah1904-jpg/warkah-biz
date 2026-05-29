@@ -4,12 +4,12 @@ import type { ChatMsg, Txn, StockItem, PettyEntry, OpExEntry } from "@/types";
 import type { BusinessSnapshot } from "./buildSystemPrompt";
 import { useLanguage } from "@/context/LanguageContext";
 
-const QUICK_CHIPS = [
-  "📊 Tunjuk P&L hari ini",
-  "⚖️ Bagaimana untuk dapat break-even",
-  "🏷️ Margin produk saya?",
-  "⚠️ Ada warning cash flow?",
-  "🛒 Stok apa nak habis?",
+const QUICK_CHIP_KEYS = [
+  "chatQuickPnl",
+  "chatQuickBreakeven",
+  "chatQuickMargin",
+  "chatQuickCashflow",
+  "chatQuickStock",
 ];
 
 export const ChatView = ({
@@ -28,7 +28,7 @@ export const ChatView = ({
   const [input, setInput] = useState("");
   const [confirmClear, setConfirmClear] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, isLoading]);
   const submit = (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -106,11 +106,14 @@ export const ChatView = ({
       )}
 
       <div className="px-3 pb-2 flex gap-2 overflow-x-auto no-scrollbar">
-        {QUICK_CHIPS.map(c => (
-          <button key={c} onClick={() => submit(c)} className="shrink-0 h-9 px-3 rounded-full bg-surface border border-border text-xs font-semibold text-muted-foreground tap">
-            {c}
-          </button>
-        ))}
+        {QUICK_CHIP_KEYS.map((key) => {
+          const label = t(key);
+          return (
+            <button key={key} onClick={() => submit(label)} className="shrink-0 h-9 px-3 rounded-full bg-surface border border-border text-xs font-semibold text-muted-foreground tap">
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="px-3 pb-3 flex items-center gap-2">
@@ -118,7 +121,7 @@ export const ChatView = ({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit(input)}
-          placeholder="Tulis soalan Boss..."
+          placeholder={t("chatInputPlaceholder")}
           className="flex-1 h-12 px-4 rounded-full bg-surface-elevated border border-border focus:outline-none focus:border-primary text-sm"
         />
         <button disabled={isLoading} onClick={() => submit(input)} className="w-12 h-12 rounded-full bg-gradient-profit text-profit-foreground grid place-items-center tap shadow-card disabled:opacity-50">

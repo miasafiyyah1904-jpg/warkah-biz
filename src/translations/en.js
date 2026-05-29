@@ -313,4 +313,11 @@ export default {
   bufferHint: "Hidden time before/after operating hours",
   hoursSaved: "Settings saved ✅",
   dayMon: "Monday", dayTue: "Tuesday", dayWed: "Wednesday", dayThu: "Thursday", dayFri: "Friday", daySat: "Saturday", daySun: "Sunday",
+  // Chat
+  chatInputPlaceholder: "Type your question Boss...",
+  chatQuickPnl: "📊 Show today's P&L",
+  chatQuickBreakeven: "⚖️ How to reach break-even",
+  chatQuickMargin: "🏷️ My product margins?",
+  chatQuickCashflow: "⚠️ Any cash flow warnings?",
+  chatQuickStock: "🛒 What stock is running low?",
 };
