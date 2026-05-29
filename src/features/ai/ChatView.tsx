@@ -28,7 +28,7 @@ export const ChatView = ({
   const [input, setInput] = useState("");
   const [confirmClear, setConfirmClear] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, isLoading]);
   const submit = (text: string) => {
     if (!text.trim() || isLoading) return;
