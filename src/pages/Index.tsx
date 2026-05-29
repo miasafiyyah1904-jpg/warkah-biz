@@ -678,9 +678,9 @@ const TodayView = ({
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
           <div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-sm bg-surface rounded-3xl p-6 animate-pop-in">
             <div className="text-3xl">💡</div>
-            <h3 className="font-extrabold text-lg mt-2">Tips dari WarkahBiz</h3>
+            <h3 className="font-extrabold text-lg mt-2">{t("tipsTitle")}</h3>
             <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{insight}</p>
-            <button onClick={() => setInsight(null)} className="mt-5 w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold tap">Faham, terima kasih!</button>
+            <button onClick={() => setInsight(null)} className="mt-5 w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold tap">{t("tipsOk")}</button>
           </div>
         </div>
       )}
