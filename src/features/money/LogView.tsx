@@ -3,6 +3,7 @@ import { Share2, Coins, ChevronDown, ChevronRight, FileText } from "lucide-react
 import type { PettyEntry, Txn, OpExEntry, OpExCategory } from "@/types";
 import { OPEX_CATEGORIES, OPEX_EMOJI } from "@/types";
 import { fmt } from "@/lib/format";
+import { useTranslation } from "@/context/LanguageContext";
 import { PettyInputSheet } from "./PettyInputSheet";
 import { OpExInputSheet } from "./OpExInputSheet";
 
