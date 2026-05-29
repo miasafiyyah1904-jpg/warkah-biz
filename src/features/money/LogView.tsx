@@ -285,10 +285,10 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
 
           {filter === "in" ? (
             <section className="space-y-3">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">Jualan Mengikut Tarikh</h2>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">{t("salesByDateHeader")}</h2>
               {salesByDate.length === 0 ? (
                 <div className="rounded-2xl p-6 bg-surface border border-dashed border-border text-center text-sm text-muted-foreground">
-                  Tiada jualan direkod.
+                  {t("noSalesRecorded")}
                 </div>
               ) : (
                 salesByDate.map((group, gi) => {
