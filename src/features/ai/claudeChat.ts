@@ -7,7 +7,7 @@ export async function sendToClaudeAPI(
   history: ChatMsg[],
   snapshot: BusinessSnapshot
 ): Promise<string> {
-  const systemPrompt = buildSystemPrompt(snapshot);
+  const systemPrompt = buildSystemPrompt(snapshot, snapshot.language ?? "ms");
   const recent = history.slice(-6);
   const messages = [
     ...recent.map((m) => ({
