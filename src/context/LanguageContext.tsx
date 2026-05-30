@@ -26,7 +26,7 @@ function readInitial(): Language {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(readInitial);
+  const [language, setLanguageState] = useState<Language>(() => readInitial());
 
   useEffect(() => {
     if (typeof document !== "undefined") document.documentElement.lang = language;
@@ -35,7 +35,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, [language]);
 
-  const setLanguage = (lang: Language) => setLanguageState(lang);
+  const setLanguage = (lang: Language) => {
+    setLanguageState("ms");
+    setTimeout(() => setLanguageState(lang), 0);
+  };
 
   const dict = DICTS[language] ?? DICTS.ms;
   const t = (key: string) => dict[key] ?? (DICTS.ms[key] ?? key);
