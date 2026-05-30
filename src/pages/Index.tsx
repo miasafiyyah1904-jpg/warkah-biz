@@ -42,7 +42,7 @@ import { OPEX_CATEGORIES, OPEX_EMOJI } from "@/types";
 
 const Index = () => {
   const { userId, user, signOut } = useAuth();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [tab, setTab] = useState<Tab>("today");
   const [modalOpen, setModalOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
@@ -447,7 +447,7 @@ const Index = () => {
 
   return (
     <div className="bg-gradient-shell min-h-screen text-foreground">
-      
+      <div style={{ background: 'red', color: 'white', padding: '4px' }}>LANG: {language}</div>
       <div className="mx-auto w-full max-w-[440px] min-h-screen relative bg-background shadow-card overflow-hidden flex flex-col">
         <AppHeader
           businessName={businessName || profileName}
