@@ -447,7 +447,7 @@ const Index = () => {
 
   return (
     <div className="bg-gradient-shell min-h-screen text-foreground">
-      
+      <div style={{ background: 'red', color: 'white', padding: '4px' }}>LANG: {language}</div>
       <div className="mx-auto w-full max-w-[440px] min-h-screen relative bg-background shadow-card overflow-hidden flex flex-col">
         <AppHeader
           businessName={businessName || profileName}
