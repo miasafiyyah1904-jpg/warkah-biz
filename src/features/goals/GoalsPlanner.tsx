@@ -66,9 +66,9 @@ export function GoalsPlanner({
   const [goalType, setGoalType] = useState<GoalType | null>(null);
   const [resetKey, setResetKey] = useState(0);
 
-  const handlePickGoalType = (t: GoalType) => {
-    if (t !== goalType) {
-      setGoalType(t);
+  const handlePickGoalType = (newType: GoalType) => {
+    if (newType !== goalType) {
+      setGoalType(newType);
       setResetKey((k) => k + 1);
     }
   };
