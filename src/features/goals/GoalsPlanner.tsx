@@ -314,6 +314,7 @@ function MachineFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
 // FLOW 2: SALES
 // =====================================================================
 function SalesFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
+  const { t: tr } = useTranslation();
   // Step 2: monthly target
   const [target, setTarget] = useState(0);
   const [currentSales, setCurrentSales] = useState(0);
@@ -328,7 +329,7 @@ function SalesFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
     if (!step2Done) { setBreakdown(null); return; }
     const id = ++breakReqId.current;
     setBreakdownLoading(true);
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       const data = await invokeGoalTips<SalesBreakdownResp>({
         mode: "salesBreakdown", monthlyTarget: target, businessName: boss,
       });
@@ -336,7 +337,7 @@ function SalesFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
       setBreakdown(data);
       setBreakdownLoading(false);
     }, 500);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [step2Done, target, boss]);
 
   // Step 4: AI tips
@@ -348,7 +349,7 @@ function SalesFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
     if (!breakdown) { setTips(null); return; }
     const id = ++tipsReqId.current;
     setTipsLoading(true);
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       const data = await invokeGoalTips<{ tips: string[] }>({
         mode: "salesTips", monthlyTarget: target, currentSales, businessName: boss,
       });
@@ -356,7 +357,7 @@ function SalesFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
       setTips(data?.tips ?? null);
       setTipsLoading(false);
     }, 400);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [breakdown, target, currentSales, boss]);
 
   // Step 5: ROI = extra profit if hit target
@@ -364,23 +365,23 @@ function SalesFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
 
   return (
     <>
-      <StepCard num={2} title="Sasaran Jualan Bulanan">
-        <FieldNumber label="Target Jualan Bulan Ini (RM)" value={target} onChange={setTarget} placeholder="Contoh: 15000" />
-        <FieldNumber label="Jualan biasa sekarang (RM/bulan, pilihan)" value={currentSales} onChange={setCurrentSales} placeholder="Contoh: 9000" />
+      <StepCard num={2} title={tr("goalSalesTargetTitle")}>
+        <FieldNumber label={tr("goalMonthlyTargetLabel")} value={target} onChange={setTarget} placeholder={tr("goalMonthlyTargetPh")} />
+        <FieldNumber label={tr("goalCurrentSalesLabel")} value={currentSales} onChange={setCurrentSales} placeholder={tr("goalCurrentSalesPh")} />
       </StepCard>
 
       {step2Done && (
-        <StepCard num={3} title="Pecahan Target Harian" icon={<Sparkles className="w-4 h-4 text-primary" />}>
+        <StepCard num={3} title={tr("goalDailyBreakdownTitle")} icon={<Sparkles className="w-4 h-4 text-primary" />}>
           {breakdownLoading && !breakdown ? (
             <SkeletonBlock />
           ) : breakdown ? (
             <div className="rounded-2xl p-4 bg-primary/5 border border-primary/20 space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <Stat label="Hari biasa (Isnin-Jumaat)" value={fmt(breakdown.weekdayTarget)} />
-                <Stat label="Hujung minggu" value={fmt(breakdown.weekendTarget)} accent />
+                <Stat label={tr("goalWeekdayLabel")} value={fmt(breakdown.weekdayTarget)} />
+                <Stat label={tr("goalWeekendLabel")} value={fmt(breakdown.weekendTarget)} accent />
               </div>
               <div className="text-center pt-2 border-t border-primary/20">
-                <p className="text-xs text-muted-foreground">Purata harian</p>
+                <p className="text-xs text-muted-foreground">{tr("goalDailyAvg")}</p>
                 <p className="text-xl font-extrabold text-primary">{fmt(breakdown.dailyAverage)}</p>
               </div>
               <p className="text-xs italic text-muted-foreground">{breakdown.insight}</p>
@@ -390,14 +391,14 @@ function SalesFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
       )}
 
       {breakdown && (
-        <StepCard num={4} title="Strategi Operasi AI" icon={<Lightbulb className="w-4 h-4 text-warn" />}>
+        <StepCard num={4} title={tr("goalOpsStrategyTitle")} icon={<Lightbulb className="w-4 h-4 text-warn" />}>
           {tipsLoading && !tips ? (
             <SkeletonBlock />
           ) : tips ? (
             <div className="space-y-2">
-              {tips.map((t, i) => (
+              {tips.map((tip, i) => (
                 <div key={i} className="rounded-2xl p-4 bg-warn-soft border border-warn/30">
-                  <p className="text-sm leading-relaxed">{t}</p>
+                  <p className="text-sm leading-relaxed">{tip}</p>
                 </div>
               ))}
             </div>
@@ -406,18 +407,20 @@ function SalesFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
       )}
 
       {tips && (
-        <FinalCard title="Pulangan Target" boss={boss}>
-          <Row label="Jualan sekarang" value={fmt(currentSales)} />
-          <Row label="Sasaran baru" value={fmt(target)} />
-          <Row label="Tambahan jualan/bulan" value={fmt(extra)} />
-          <Row label="Tambahan jualan/tahun" value={fmt(extra * 12)} />
+        <FinalCard title={tr("goalReturnTitle")} boss={boss}>
+          <Row label={tr("goalCurrentSales")} value={fmt(currentSales)} />
+          <Row label={tr("goalNewTarget")} value={fmt(target)} />
+          <Row label={tr("goalAddSalesMonth")} value={fmt(extra)} />
+          <Row label={tr("goalAddSalesYear")} value={fmt(extra * 12)} />
           {extra > 0 ? (
             <p className="text-sm leading-relaxed pt-2 border-t border-white/20">
-              Kalau {boss} hit target, dapat tambahan{" "}
-              <span className="font-extrabold">{fmt(extra)}/bulan</span> = <span className="font-extrabold">{fmt(extra * 12)}/tahun</span> 🎉
+              {tr("goalSalesEncouragement")
+                .replace("{boss}", boss)
+                .replace("{month}", fmt(extra))
+                .replace("{year}", fmt(extra * 12))}
             </p>
           ) : (
-            <p className="text-xs opacity-90 italic pt-2">Isi jualan semasa untuk lihat tambahan untung.</p>
+            <p className="text-xs opacity-90 italic pt-2">{tr("goalSalesEmptyHint")}</p>
           )}
         </FinalCard>
       )}
@@ -426,7 +429,7 @@ function SalesFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
         <SaveButton
           payload={{
             goal_type: "sales",
-            goal_name: `Target ${fmt(target)}/bulan`,
+            goal_name: tr("goalSalesNameFmt").replace("{amount}", fmt(target)),
             target_amount: target,
             current_saved: currentSales,
             selected_plan: null,
