@@ -155,6 +155,7 @@ export function GoalsPlanner({
 // FLOW 1: MACHINE
 // =====================================================================
 function MachineFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
+  const { t } = useTranslation();
   // Step 2 inputs
   const [name, setName] = useState("");
   const [cost, setCost] = useState(0);
