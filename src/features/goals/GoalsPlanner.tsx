@@ -210,13 +210,13 @@ function MachineFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
 
   return (
     <>
-      <StepCard num={2} title={`Butiran Mesin ${boss}`}>
-        <FieldInput label="Nama Mesin / Peralatan" value={name} onChange={setName} placeholder="Contoh: Mesin penguli 20kg" />
-        <FieldNumber label="Kos Diperlukan (RM)" value={cost} onChange={setCost} placeholder="Contoh: 4800" />
+      <StepCard num={2} title={t("goalMachineDetails").replace("{boss}", boss)}>
+        <FieldInput label={t("goalMachineNameLabel")} value={name} onChange={setName} placeholder={t("goalMachineNamePh")} />
+        <FieldNumber label={t("goalCostNeededLabel")} value={cost} onChange={setCost} placeholder={t("goalCostNeededPh")} />
       </StepCard>
 
       {step2Done && (
-        <StepCard num={3} title="Kelebihan Pelaburan Ini" icon={<Sparkles className="w-4 h-4 text-primary" />}>
+        <StepCard num={3} title={t("goalBenefitsTitle")} icon={<Sparkles className="w-4 h-4 text-primary" />}>
           {benefitsLoading && !benefits ? (
             <SkeletonBlock />
           ) : benefits ? (
@@ -235,20 +235,20 @@ function MachineFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
       )}
 
       {step2Done && benefits && (
-        <StepCard num={4} title={`Simpanan ${boss}`}>
-          <FieldNumber label="Jumlah Dah Simpan (RM)" value={saved} onChange={setSaved} placeholder="Contoh: 1200" />
-          <FieldNumber label="Boleh jimat sebulan (RM)" value={canSave} onChange={setCanSave} placeholder="Contoh: 400" />
+        <StepCard num={4} title={t("goalSavingsTitle").replace("{boss}", boss)}>
+          <FieldNumber label={t("goalSavedAmountLabel")} value={saved} onChange={setSaved} placeholder={t("goalSavedAmountPh")} />
+          <FieldNumber label={t("goalCanSaveLabel")} value={canSave} onChange={setCanSave} placeholder={t("goalCanSavePh")} />
           {cost > 0 && (
             <div className="rounded-xl bg-card border border-border p-3 mt-2">
               <ProgressRow saved={saved} target={cost} />
-              <p className="text-xs text-muted-foreground mt-1.5">Baki: <span className="font-bold text-foreground">{fmt(remaining)}</span></p>
+              <p className="text-xs text-muted-foreground mt-1.5">{t("goalRemainingLabel")} <span className="font-bold text-foreground">{fmt(remaining)}</span></p>
             </div>
           )}
         </StepCard>
       )}
 
       {step4Done && remaining > 0 && (
-        <StepCard num={5} title="Pilih Pelan Simpanan AI" icon={<Sparkles className="w-4 h-4 text-primary" />}>
+        <StepCard num={5} title={t("goalPickPlanTitle")} icon={<Sparkles className="w-4 h-4 text-primary" />}>
           {plansLoading && !plans ? (
             <SkeletonBlock />
           ) : plans ? (
@@ -264,11 +264,11 @@ function MachineFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-bold">{p.label}: Simpan {fmt(p.monthly)}/bulan</p>
+                      <p className="text-sm font-bold">{t("goalPlanSaveLine").replace("{label}", p.label).replace("{amount}", fmt(p.monthly))}</p>
                       {active && <CheckCircle2 className="w-5 h-5 text-primary" />}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Capai dalam <span className="font-bold text-foreground">{p.months} bulan</span>
+                      {t("goalPlanReach")} <span className="font-bold text-foreground">{p.months} {t("goalMonthsSuffix")}</span>
                     </p>
                   </button>
                 );
@@ -279,19 +279,20 @@ function MachineFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
       )}
 
       {chosen && (
-        <FinalCard title={`Roadmap: ${name}`} boss={boss}>
-          <Row label="Sasaran" value={fmt(cost)} />
-          <Row label="Dah Tersimpan" value={fmt(saved)} />
-          <Row label="Baki Diperlukan" value={fmt(remaining)} />
+        <FinalCard title={t("goalRoadmap").replace("{name}", name)} boss={boss}>
+          <Row label={t("goalTarget")} value={fmt(cost)} />
+          <Row label={t("goalSavedSoFar")} value={fmt(saved)} />
+          <Row label={t("goalRemainingNeeded")} value={fmt(remaining)} />
           <div className="border-t border-white/20 pt-3 mt-2">
-            <Row label="Pelan Dipilih" value={`${chosen.label} (${fmt(chosen.monthly)}/bln)`} />
-            <Row label="Anggaran Tempoh" value={`${chosen.months} bulan`} />
+            <Row label={t("goalSelectedPlan")} value={`${chosen.label} (${fmt(chosen.monthly)}/bln)`} />
+            <Row label={t("goalEstDuration")} value={`${chosen.months} ${t("goalMonthsSuffix")}`} />
           </div>
           <p className="text-xs opacity-90 italic pt-2">
-            Teruskan semangat {boss}! Setiap bulan {fmt(chosen.monthly)} = satu langkah lebih dekat 💪
+            {t("goalMachineEncouragement").replace("{boss}", boss).replace("{amount}", fmt(chosen.monthly))}
           </p>
         </FinalCard>
       )}
+
 
       {chosen && (
         <SaveButton
