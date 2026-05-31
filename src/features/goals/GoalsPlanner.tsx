@@ -60,6 +60,7 @@ export function GoalsPlanner({
   businessName: string;
 }) {
   const boss = addressBoss(businessName);
+  const { t } = useTranslation();
   const [view, setView] = useState<"dashboard" | "wizard">("dashboard");
   const [dashboardKey, setDashboardKey] = useState(0); // force reload after save
   const [goalType, setGoalType] = useState<GoalType | null>(null);
