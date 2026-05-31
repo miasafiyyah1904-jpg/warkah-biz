@@ -445,6 +445,7 @@ function SalesFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
 // FLOW 3: BRANCH
 // =====================================================================
 function BranchFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
+  const { t: tr } = useTranslation();
   // Step 2: location
   const [location, setLocation] = useState("");
   const [suggestions, setSuggestions] = useState<{ name: string; reason: string }[] | null>(null);
@@ -469,7 +470,7 @@ function BranchFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
     if (!step2Done) { setCosts(null); return; }
     const id = ++costsReqId.current;
     setCostsLoading(true);
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       const data = await invokeGoalTips<CostBreakdownResp>({
         mode: "costBreakdown", location: location.trim(), businessName: boss, businessType: "F&B / warung",
       });
@@ -477,7 +478,7 @@ function BranchFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
       setCosts(data);
       setCostsLoading(false);
     }, 600);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [step2Done, location, boss]);
 
   // Step 4: AI plans (based on total cost)
@@ -493,7 +494,7 @@ function BranchFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
     if (!step4Done) { setPlans(null); setChosen(null); return; }
     const id = ++plansReqId.current;
     setPlansLoading(true);
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       const data = await invokeGoalTips<PlansResp>({
         mode: "plans", goalName: `Buka cawangan di ${location}`, cost: totalCost, canSavePerMonth: canSave,
       });
@@ -501,19 +502,19 @@ function BranchFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
       setPlans(data?.plans ?? null);
       setPlansLoading(false);
     }, 500);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [step4Done, totalCost, canSave, location]);
 
   return (
     <>
-      <StepCard num={2} title="Lokasi Cawangan Baru">
+      <StepCard num={2} title={tr("goalBranchLocTitle")}>
         <div>
-          <Label className="text-xs">Target Lokasi</Label>
+          <Label className="text-xs">{tr("goalLocationLabel")}</Label>
           <div className="flex gap-2 mt-1">
             <Input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Contoh: Tepi sekolah Taman Melati"
+              placeholder={tr("goalLocationPh")}
               className="h-12 rounded-xl flex-1"
             />
             <Button
@@ -523,13 +524,13 @@ function BranchFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
               variant="outline"
             >
               {suggestLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              <span className="ml-1">Cadangan AI</span>
+              <span className="ml-1">{tr("goalAiSuggest")}</span>
             </Button>
           </div>
         </div>
         {suggestions && (
           <div className="space-y-2 pt-2">
-            <p className="text-xs text-muted-foreground font-semibold">Klik untuk pilih:</p>
+            <p className="text-xs text-muted-foreground font-semibold">{tr("goalClickToPick")}</p>
             {suggestions.map((s, i) => (
               <button
                 key={i}
@@ -545,7 +546,7 @@ function BranchFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
       </StepCard>
 
       {step2Done && (
-        <StepCard num={3} title="Anggaran Kos Permulaan" icon={<Sparkles className="w-4 h-4 text-primary" />}>
+        <StepCard num={3} title={tr("goalCostBreakdownTitle")} icon={<Sparkles className="w-4 h-4 text-primary" />}>
           {costsLoading && !costs ? (
             <SkeletonBlock />
           ) : costs ? (
@@ -560,7 +561,7 @@ function BranchFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
                 </div>
               ))}
               <div className="flex items-center justify-between p-3 bg-primary/10">
-                <p className="text-sm font-extrabold">Jumlah Anggaran</p>
+                <p className="text-sm font-extrabold">{tr("goalTotalEstimate")}</p>
                 <p className="text-base font-extrabold text-primary">{fmt(costs.total)}</p>
               </div>
             </div>
@@ -569,8 +570,8 @@ function BranchFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
       )}
 
       {costs && (
-        <StepCard num={4} title="Pilih Pelan Simpanan">
-          <FieldNumber label="Boleh jimat sebulan (RM)" value={canSave} onChange={setCanSave} placeholder="Contoh: 1000" />
+        <StepCard num={4} title={tr("goalBranchSavingsTitle")}>
+          <FieldNumber label={tr("goalCanSaveLabel")} value={canSave} onChange={setCanSave} placeholder={tr("goalBranchCanSavePh")} />
           {step4Done && (
             <>
               {plansLoading && !plans ? (
@@ -588,11 +589,11 @@ function BranchFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-bold">{p.label}: {fmt(p.monthly)}/bulan</p>
+                          <p className="text-sm font-bold">{tr("goalPlanLine").replace("{label}", p.label).replace("{amount}", fmt(p.monthly))}</p>
                           {active && <CheckCircle2 className="w-5 h-5 text-primary" />}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Capai dalam <span className="font-bold text-foreground">{p.months} bulan</span>
+                          {tr("goalPlanReach")} <span className="font-bold text-foreground">{p.months} {tr("goalMonthsSuffix")}</span>
                         </p>
                       </button>
                     );
@@ -605,13 +606,15 @@ function BranchFlow({ boss, onSaved }: { boss: string; onSaved: () => void }) {
       )}
 
       {chosen && costs && (
-        <FinalCard title={`Roadmap Cawangan: ${location}`} boss={boss}>
-          <Row label="Jumlah modal" value={fmt(costs.total)} />
-          <Row label="Pelan dipilih" value={`${chosen.label} (${fmt(chosen.monthly)}/bln)`} />
-          <Row label="Anggaran tempoh" value={`${chosen.months} bulan`} />
+        <FinalCard title={tr("goalBranchRoadmapTitle").replace("{loc}", location)} boss={boss}>
+          <Row label={tr("goalTotalCapital")} value={fmt(costs.total)} />
+          <Row label={tr("goalSelPlanLower")} value={`${chosen.label} (${fmt(chosen.monthly)}/bln)`} />
+          <Row label={tr("goalEstDurationLower")} value={`${chosen.months} ${tr("goalMonthsSuffix")}`} />
           <p className="text-xs opacity-90 italic pt-2 border-t border-white/20 mt-2">
-            {boss} boleh buka cawangan baru di <span className="font-bold">{location}</span> dalam{" "}
-            <span className="font-extrabold">{chosen.months} bulan</span> 🎉
+            {tr("goalBranchEncouragement")
+              .replace("{boss}", boss)
+              .replace("{loc}", location)
+              .replace("{n}", String(chosen.months))}
           </p>
         </FinalCard>
       )}
