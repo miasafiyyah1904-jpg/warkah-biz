@@ -98,18 +98,18 @@ export function GoalsPlanner({
     <div className="fixed inset-0 z-40 bg-background overflow-y-auto animate-fade-in">
       <div className="mx-auto w-full max-w-full sm:max-w-[600px] md:max-w-[760px] lg:max-w-[960px] xl:max-w-[1140px] 2xl:max-w-[1280px] min-h-screen bg-background pb-32">
         <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-4 py-3 flex items-center gap-3">
-          <button onClick={() => setView("dashboard")} className="w-10 h-10 grid place-items-center rounded-full hover:bg-muted tap" aria-label="Kembali">
+          <button onClick={() => setView("dashboard")} className="w-10 h-10 grid place-items-center rounded-full hover:bg-muted tap" aria-label={t("goalsBack")}>
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-lg font-extrabold leading-tight">Bina Impian Baru</h1>
-            <p className="text-xs text-muted-foreground">AI bina pelan langkah-demi-langkah</p>
+            <h1 className="text-lg font-extrabold leading-tight">{t("goalsBuildNew")}</h1>
+            <p className="text-xs text-muted-foreground">{t("goalsAiSubtitle")}</p>
           </div>
         </header>
 
         <div className="px-4 py-5 space-y-6">
           {/* Step 1: pick goal type */}
-          <StepCard num={1} title="Pilih Jenis Matlamat">
+          <StepCard num={1} title={t("goalsPickType")}>
             <div className="grid grid-cols-1 gap-2">
               {GOAL_TYPES.map((g) => {
                 const active = goalType === g.id;
@@ -123,8 +123,8 @@ export function GoalsPlanner({
                   >
                     <div className="text-3xl">{g.emoji}</div>
                     <div className="flex-1">
-                      <p className="font-extrabold">{g.title}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{g.desc}</p>
+                      <p className="font-extrabold">{t(g.titleKey)}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{t(g.descKey)}</p>
                     </div>
                     {active && <CheckCircle2 className="w-5 h-5 text-primary" />}
                   </button>
@@ -132,6 +132,7 @@ export function GoalsPlanner({
               })}
             </div>
           </StepCard>
+
 
           {/* Conditional flow render (key forces remount = clean state) */}
           {goalType === "machine" && (
