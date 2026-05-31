@@ -10,13 +10,14 @@ import { fmt } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardImpian } from "./DashboardImpian";
 import { createImpian, type SelectedPlan } from "./impianApi";
+import { useTranslation } from "@/context/LanguageContext";
 
 type GoalType = "machine" | "sales" | "branch";
 
-const GOAL_TYPES: { id: GoalType; emoji: string; title: string; desc: string }[] = [
-  { id: "machine", emoji: "🏭", title: "Beli Mesin / Peralatan", desc: "Pelaburan mesin atau alatan baru" },
-  { id: "sales",   emoji: "📈", title: "Tingkatkan Jualan",       desc: "Pecahan target & pelan operasi" },
-  { id: "branch",  emoji: "🏠", title: "Buka Cawangan / Gerai Baru", desc: "Anggaran kos & lokasi strategik" },
+const GOAL_TYPES: { id: GoalType; emoji: string; titleKey: string; descKey: string }[] = [
+  { id: "machine", emoji: "🏭", titleKey: "goalTypeMachineTitle", descKey: "goalTypeMachineDesc" },
+  { id: "sales",   emoji: "📈", titleKey: "goalTypeSalesTitle",   descKey: "goalTypeSalesDesc" },
+  { id: "branch",  emoji: "🏠", titleKey: "goalTypeBranchTitle",  descKey: "goalTypeBranchDesc" },
 ];
 
 const addressBoss = (n: string) => (n?.trim() ? n.trim() : "Boss");
