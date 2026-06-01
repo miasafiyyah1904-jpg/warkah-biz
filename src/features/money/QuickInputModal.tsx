@@ -3,8 +3,7 @@ import { X, Check, Delete, Camera, Plus, Trash2, ArrowLeft } from "lucide-react"
 import type { Txn, TxnType, ReceiptItem, Product, Unit } from "@/types";
 import { ReceiptScanner } from "@/features/inventory/ReceiptScanner";
 import { emojiForItem } from "@/lib/stockEmoji";
-
-const incomeSuggestions = ["Jualan Pagi", "Jualan Petang", "Penghantaran"];
+import { useTranslation } from "@/context/LanguageContext";
 
 const ALLOWED_UNITS: Unit[] = [
   "ekor", "kotak", "kg", "gram", "paket", "liter", "botol",
@@ -23,6 +22,14 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
   onBoughtItems?: (items: Array<{ name: string; qty: number; unit: string; isOpEx: boolean }>) => void;
   products: Product[];
 }) => {
+  const { t } = useTranslation();
+
+  const incomeSuggestions = [
+    t("qim_jualan_pagi"),
+    t("qim_jualan_petang"),
+    t("qim_penghantaran"),
+  ];
+
   const [mode, setMode] = useState<TxnType>("in");
   const [amount, setAmount] = useState("0"); // for income mode
   const [note, setNote] = useState("");
@@ -156,13 +163,13 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                 onClick={() => setMode("in")}
                 className={`py-3 rounded-xl font-bold text-sm tap ${mode === "in" ? "bg-gradient-profit text-profit-foreground shadow-card" : "text-muted-foreground"}`}
               >
-                💰 Dapat Duit
+                {t("qim_dapat_duit")}
               </button>
               <button
                 onClick={() => { setMode("out"); setOutMode("choose"); if (!draftUnit && ingredientOptions[0]) setDraftUnit(ingredientOptions[0].unit); }}
                 className={`py-3 rounded-xl font-bold text-sm tap ${mode === "out" ? "bg-gradient-cost text-white shadow-card" : "text-muted-foreground"}`}
               >
-                💸 Pembelian
+                {t("qim_pembelian")}
               </button>
             </div>
           </div>
@@ -176,10 +183,10 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                 <div className="text-center space-y-4 max-w-xs">
                   <div className="text-5xl">📋</div>
                   <p className="text-sm font-semibold">
-                    Sila tambah produk dalam Profil sebelum merekod pembelian.
+                    {t("qim_no_products_msg")}
                   </p>
                   <button onClick={onClose} className="h-12 px-6 rounded-2xl bg-primary text-primary-foreground font-bold tap">
-                    Tutup
+                    {t("qim_tutup")}
                   </button>
                 </div>
               </div>
@@ -194,8 +201,8 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                     <Camera className="w-9 h-9" strokeWidth={2.4} />
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-extrabold">📷 Imbas Resit dengan AI</div>
-                    <div className="text-xs opacity-90 mt-1">Pilihan Utama — Pantas & Automatik</div>
+                    <div className="text-lg font-extrabold">{t("qim_scan_receipt")}</div>
+                    <div className="text-xs opacity-90 mt-1">{t("qim_scan_subtitle")}</div>
                   </div>
                 </button>
 
@@ -204,14 +211,14 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                     onClick={() => { resetDraft(); setOutMode("manual"); }}
                     className="text-sm font-semibold text-muted-foreground underline underline-offset-4 tap"
                   >
-                    atau tambah secara manual →
+                    {t("qim_or_manual")}
                   </button>
                 </div>
 
                 {items.length > 0 && (
                   <div className="rounded-2xl bg-background border border-border p-3 space-y-2">
                     <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      Item dalam sesi ini ({items.length})
+                      {t("qim_items_in_session", { count: items.length })}
                     </div>
                     {items.map((it, idx) => (
                       <div key={idx} className="flex items-center gap-2 text-sm">
@@ -224,7 +231,7 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                       onClick={() => setConfirming(true)}
                       className="w-full h-11 rounded-2xl bg-gradient-cost text-white font-bold tap text-sm mt-2"
                     >
-                      Ke Pengesahan →
+                      {t("qim_to_confirm")}
                     </button>
                   </div>
                 )}
@@ -237,13 +244,13 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                     onClick={() => setOutMode("choose")}
                     className="text-xs font-semibold text-muted-foreground tap flex items-center gap-1"
                   >
-                    <ArrowLeft className="w-3 h-3" /> Kembali ke pilihan
+                    <ArrowLeft className="w-3 h-3" /> {t("qim_back_to_choice")}
                   </button>
 
                   {items.length > 0 && (
                     <div className="rounded-2xl bg-background border border-border p-3 space-y-2">
                       <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        Item dalam sesi ini ({items.length})
+                        {t("qim_items_in_session", { count: items.length })}
                       </div>
                       {items.map((it, idx) => (
                         <div key={idx} className="flex items-center gap-2 text-sm">
@@ -259,7 +266,7 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                         </div>
                       ))}
                       <div className="border-t border-border pt-2 flex justify-between text-sm">
-                        <span className="font-bold text-muted-foreground">Jumlah</span>
+                        <span className="font-bold text-muted-foreground">{t("total")}</span>
                         <span className="font-extrabold text-cost">RM {totalSpent.toFixed(2)}</span>
                       </div>
                     </div>
@@ -267,16 +274,16 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
 
                   <div className="rounded-2xl bg-background border-2 border-primary/20 p-4 space-y-3">
                     <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                      Item baharu
+                      {t("qim_new_item")}
                       <span className="ml-auto text-[10px] normal-case font-semibold text-primary">
-                        Langkah {step === "name" ? "1" : step === "qty" ? "2" : "3"} / 3
+                        {t("qim_step_of", { step: step === "name" ? "1" : step === "qty" ? "2" : "3" })}
                       </span>
                     </div>
 
                     {step === "name" && (
                       <div className="space-y-3 animate-fade-in">
                         <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                          Apa yang dibeli?
+                          {t("qim_what_bought")}
                         </div>
                         <input
                           type="text"
@@ -288,7 +295,7 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                             const found = ingredientOptions.find(i => i.name.toLowerCase() === name.toLowerCase());
                             if (found) setDraftUnit(found.unit);
                           }}
-                          placeholder="Cari atau taip nama item…"
+                          placeholder={t("qim_search_or_type")}
                           className="w-full h-12 px-3 rounded-2xl bg-surface-elevated border border-border text-sm font-semibold focus:outline-none focus:border-primary"
                         />
                         <datalist id="quick-ingredient-suggestions">
@@ -299,7 +306,7 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                         {draftName && !ingredientOptions.some(i => i.name.toLowerCase() === draftName.toLowerCase()) && (
                           <div className="text-[11px] text-muted-foreground flex items-center gap-1.5 px-1">
                             <span className="text-base">{emojiForItem(draftName)}</span>
-                            <span>Item baharu — emoji ditetapkan secara automatik</span>
+                            <span>{t("qim_new_item_emoji")}</span>
                           </div>
                         )}
                         <button
@@ -307,7 +314,7 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                           onClick={() => setStep("qty")}
                           className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold tap disabled:opacity-50"
                         >
-                          Seterusnya →
+                          {t("next")}
                         </button>
                       </div>
                     )}
@@ -315,7 +322,7 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                     {step === "qty" && (
                       <div className="space-y-3 animate-fade-in">
                         <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                          Berapa banyak & unit?
+                          {t("qim_how_much_unit")}
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                           <input
@@ -324,7 +331,7 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                             value={draftQty}
                             onChange={(e) => setDraftQty(e.target.value)}
                             className="h-12 px-3 rounded-2xl bg-surface-elevated border border-border text-base font-semibold focus:outline-none focus:border-primary"
-                            placeholder="Kuantiti"
+                            placeholder={t("qty")}
                           />
                           {draftUnit === CUSTOM_UNIT_KEY ? (
                             <input
@@ -333,7 +340,7 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                               value={customUnit}
                               onChange={(e) => setCustomUnit(e.target.value)}
                               onBlur={() => { if (!customUnit.trim()) setDraftUnit("kg"); else setDraftUnit(customUnit.trim()); }}
-                              placeholder="cth: periuk, talam"
+                              placeholder={t("qim_custom_unit_placeholder")}
                               className="h-12 px-3 rounded-2xl bg-surface-elevated border border-border text-sm font-semibold focus:outline-none focus:border-primary"
                             />
                           ) : (
@@ -347,7 +354,7 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                               className="h-12 px-3 rounded-2xl bg-surface-elevated border border-border text-sm font-semibold focus:outline-none focus:border-primary"
                             >
                               {ALLOWED_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
-                              <option value={CUSTOM_UNIT_KEY}>Lain-lain — taip sendiri</option>
+                              <option value={CUSTOM_UNIT_KEY}>{t("qim_other_custom")}</option>
                             </select>
                           )}
                         </div>
@@ -359,14 +366,14 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                           <button onClick={() => setStep("name")} className="h-12 rounded-2xl bg-surface-elevated border border-border font-bold tap flex items-center justify-center gap-1">
-                            <ArrowLeft className="w-4 h-4" /> Kembali
+                            <ArrowLeft className="w-4 h-4" /> {t("back")}
                           </button>
                           <button
                             disabled={parseFloat(draftQty) <= 0}
                             onClick={() => setStep("amount")}
                             className="h-12 rounded-2xl bg-primary text-primary-foreground font-bold tap disabled:opacity-50"
                           >
-                            Seterusnya →
+                            {t("next")}
                           </button>
                         </div>
                       </div>
@@ -375,7 +382,7 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                     {step === "amount" && (
                       <div className="space-y-3 animate-fade-in">
                         <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                          Berapa harga? (RM)
+                          {t("qim_how_much_price")}
                         </div>
                         <div className="rounded-2xl p-4 text-center bg-cost/10">
                           <div className="text-4xl font-extrabold text-cost">RM {draftAmount}</div>
@@ -400,14 +407,14 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                           <button onClick={() => setStep("qty")} className="h-12 rounded-2xl bg-surface-elevated border border-border font-bold tap flex items-center justify-center gap-1">
-                            <ArrowLeft className="w-4 h-4" /> Kembali
+                            <ArrowLeft className="w-4 h-4" /> {t("back")}
                           </button>
                           <button
                             disabled={parseFloat(draftAmount) <= 0}
                             onClick={commitDraft}
                             className="h-12 rounded-2xl bg-primary text-primary-foreground font-bold tap disabled:opacity-50"
                           >
-                            Seterusnya →
+                            {t("next")}
                           </button>
                         </div>
                       </div>
@@ -423,8 +430,8 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
         {confirming && (
           <div className="flex flex-col flex-1 overflow-hidden">
             <div className="px-5 pt-4 pb-2">
-              <h2 className="text-xl font-extrabold">Sahkan Pembelian 🧾</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Semak senarai sebelum simpan</p>
+              <h2 className="text-xl font-extrabold">{t("qim_confirm_purchase")}</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("qim_check_list")}</p>
             </div>
             <div className="flex-1 overflow-y-auto px-5 space-y-2">
               {items.map((it, idx) => (
@@ -437,14 +444,14 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                   <button
                     onClick={() => setItems(prev => prev.filter((_, i) => i !== idx))}
                     className="w-7 h-7 rounded-md bg-cost/10 text-cost grid place-items-center tap"
-                    aria-label="Padam"
+                    aria-label={t("deleteBtn")}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ))}
               <div className="rounded-2xl bg-cost/10 border border-cost/30 p-4 flex items-center justify-between mt-3">
-                <span className="font-bold uppercase tracking-wider text-xs">Jumlah Belanja</span>
+                <span className="font-bold uppercase tracking-wider text-xs">{t("qim_total_spent")}</span>
                 <span className="font-extrabold text-cost text-xl">RM {totalSpent.toFixed(2)}</span>
               </div>
             </div>
@@ -453,14 +460,14 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                 onClick={handleAddMore}
                 className="w-full h-12 rounded-2xl bg-surface-elevated border-2 border-primary text-primary font-bold tap flex items-center justify-center gap-2"
               >
-                <Plus className="w-4 h-4" /> Tambah Lagi
+                <Plus className="w-4 h-4" /> {t("qim_add_more")}
               </button>
               <button
                 onClick={handleConfirmFinal}
                 disabled={items.length === 0}
                 className="w-full h-14 rounded-2xl font-extrabold text-base tap shadow-card bg-gradient-profit text-profit-foreground disabled:opacity-50"
               >
-                Simpan & Kemaskini Stok ✅
+                {t("qim_save_update_stock")}
               </button>
             </div>
           </div>
@@ -471,7 +478,7 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
           <>
             <div className="px-5 mt-5">
               <div className="rounded-3xl p-5 text-center bg-profit/10">
-                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Berapa dapat?</div>
+                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("qim_how_much_received")}</div>
                 <div className="text-5xl font-extrabold mt-2 text-profit">RM {amount}</div>
               </div>
             </div>
@@ -480,7 +487,7 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                 <input
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Apa yang dijual? (optional)"
+                  placeholder={t("qim_what_sold")}
                   className="w-full h-12 px-4 rounded-2xl bg-surface-elevated border border-border text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary"
                 />
                 <div className="flex flex-wrap gap-2">
@@ -505,7 +512,7 @@ export const QuickInputModal = ({ onClose, onSave, onReceiptConfirm, onBoughtIte
                 onClick={handleSaveIncome}
                 className={`w-full h-14 rounded-2xl font-extrabold text-lg tap shadow-card transition-opacity bg-gradient-profit text-profit-foreground ${parseFloat(amount) <= 0 ? "opacity-50" : ""}`}
               >
-                Simpan 💾
+                {t("save")}
               </button>
             </div>
           </>
