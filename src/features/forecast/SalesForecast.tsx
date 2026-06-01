@@ -9,18 +9,19 @@ import { forecastDay, clampMultiplier } from "@/lib/forecastModel";
 import { computeWeekdayStats, predictStockPrep } from "./realAggregate";
 import { saveForecasts, fetchPastAccuracy } from "./forecastApi";
 import { emojiForItem } from "@/lib/stockEmoji";
+import { useTranslation } from "@/context/LanguageContext";
 
 const DAY_NAMES_MS = ["Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu", "Ahad"];
 const MONTH_SHORT = ["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogs","Sep","Okt","Nov","Dis"];
 
 type Level = "tutup" | "rendah" | "normal" | "tinggi" | "sangat-tinggi";
 
-const LEVEL_META: Record<Level, { label: string; emoji: string; chipClass: string; cardClass: string }> = {
-  "tutup": { label: "TUTUP", emoji: "⚪", chipClass: "bg-muted text-muted-foreground", cardClass: "bg-muted/40 border-border" },
-  "rendah": { label: "RENDAH", emoji: "🔵", chipClass: "bg-muted text-muted-foreground", cardClass: "bg-muted/40 border-border" },
-  "normal": { label: "NORMAL", emoji: "🟢", chipClass: "bg-primary/15 text-primary", cardClass: "bg-primary/5 border-primary/20" },
-  "tinggi": { label: "TINGGI", emoji: "🟡", chipClass: "bg-warn-soft text-warn", cardClass: "bg-warn-soft border-warn/30" },
-  "sangat-tinggi": { label: "SANGAT TINGGI", emoji: "🔴", chipClass: "bg-cost-soft text-cost", cardClass: "bg-cost-soft border-cost/30" },
+const LEVEL_META: Record<Level, { labelKey: string; emoji: string; chipClass: string; cardClass: string }> = {
+  "tutup":        { labelKey: "sf_levelClose",    emoji: "⚪", chipClass: "bg-muted text-muted-foreground",    cardClass: "bg-muted/40 border-border" },
+  "rendah":       { labelKey: "sf_levelLow",      emoji: "🔵", chipClass: "bg-muted text-muted-foreground",    cardClass: "bg-muted/40 border-border" },
+  "normal":       { labelKey: "sf_levelNormal",   emoji: "🟢", chipClass: "bg-primary/15 text-primary",        cardClass: "bg-primary/5 border-primary/20" },
+  "tinggi":       { labelKey: "sf_levelHigh",     emoji: "🟡", chipClass: "bg-warn-soft text-warn",            cardClass: "bg-warn-soft border-warn/30" },
+  "sangat-tinggi":{ labelKey: "sf_levelVeryHigh", emoji: "🔴", chipClass: "bg-cost-soft text-cost",            cardClass: "bg-cost-soft border-cost/30" },
 };
 
 const addressBoss = (businessName: string) => businessName?.trim() ? businessName.trim() : "Boss";
@@ -64,6 +65,7 @@ export function SalesForecast({
   products: Product[];
   onSendToBuy: (items: { emoji: string; name: string; recQty: number; unit: Unit; note?: string }[]) => void;
 }) {
+  const { t } = useTranslation();
   const boss = addressBoss(businessName);
   const { data: weather, loading: weatherLoading, error: weatherError } = useWeather();
 
@@ -89,10 +91,10 @@ export function SalesForecast({
 
       const reasons: string[] = [];
       const samples = stats.perWeekdaySamples[weekdayIdx];
-      if (samples > 0) reasons.push(`Purata ${DAY_NAMES_MS[weekdayIdx]} (${samples} rekod): ${fmt(baselineForDay)}`);
-      if (w && w.severity !== "ok") reasons.push(`Cuaca: ${w.label} ${w.emoji} (${w.trafficAdjust >= 0 ? "+" : ""}${Math.round(w.trafficAdjust * 100)}% trafik)`);
-      if (baselineForDay > stats.baseline * 1.15) reasons.push(`${DAY_NAMES_MS[weekdayIdx]} biasanya hari sibuk Boss`);
-      if (baselineForDay < stats.baseline * 0.85) reasons.push(`${DAY_NAMES_MS[weekdayIdx]} biasanya hari perlahan`);
+      if (samples > 0) reasons.push(`${t("sf_avgDay")} ${DAY_NAMES_MS[weekdayIdx]} (${samples} ${t("sf_records")}): ${fmt(baselineForDay)}`);
+      if (w && w.severity !== "ok") reasons.push(`${t("sf_weather")}: ${w.label} ${w.emoji} (${w.trafficAdjust >= 0 ? "+" : ""}${Math.round(w.trafficAdjust * 100)}% ${t("sf_traffic")})`);
+      if (baselineForDay > stats.baseline * 1.15) reasons.push(`${DAY_NAMES_MS[weekdayIdx]} ${t("sf_usuallyBusy")} ${boss}`);
+      if (baselineForDay < stats.baseline * 0.85) reasons.push(`${DAY_NAMES_MS[weekdayIdx]} ${t("sf_usuallySlow")}`);
 
       const stockPrep = predictStockPrep(products, point.expected, stats.baseline);
       const level = classifyLevel(point.expected, stats.baseline);
@@ -120,7 +122,7 @@ export function SalesForecast({
       });
     }
     return out;
-  }, [hasEnoughData, stats, weather, products]);
+  }, [hasEnoughData, stats, weather, products, t]);
 
   // ── Save forecasts to DB once weather loaded ──────────────────────────
   useEffect(() => {
@@ -172,32 +174,32 @@ export function SalesForecast({
     if (!detail) return;
     const items = detail.stock.map((s) => ({
       emoji: s.emoji, name: s.name, recQty: s.need, unit: s.unit,
-      note: `Persiapan ${detail.dayName} ${detail.dateLabel}`,
+      note: `${t("sf_prepNote")} ${detail.dayName} ${detail.dateLabel}`,
     }));
-    if (!items.length) { toast.error("Tiada ramalan stok untuk hari ini"); return; }
+    if (!items.length) { toast.error(t("sf_noStockToast")); return; }
     onSendToBuy(items);
-    toast.success(`${items.length} item ditambah ke Nak Beli ✅`);
+    toast.success(`${items.length} ${t("sf_itemsAddedToBuy")} ✅`);
   };
 
   const handleSendWeekToBuy = () => {
     const items = weeklyChecklist
       .filter((w) => !checked.has(w.name))
-      .map((w) => ({ emoji: w.emoji, name: w.name, recQty: w.total, unit: w.unit, note: "Persiapan minggu" }));
-    if (items.length === 0) { toast.error("Tiada item untuk dihantar"); return; }
+      .map((w) => ({ emoji: w.emoji, name: w.name, recQty: w.total, unit: w.unit, note: t("sf_prepWeekNote") }));
+    if (items.length === 0) { toast.error(t("sf_noItemsToSend")); return; }
     onSendToBuy(items);
-    toast.success(`${items.length} item dihantar ke Nak Beli ✅`);
+    toast.success(`${items.length} ${t("sf_itemsSentToBuy")} ✅`);
   };
 
   return (
     <div className="fixed inset-0 z-40 bg-background overflow-y-auto animate-fade-in">
       <div className="mx-auto w-full max-w-full sm:max-w-[600px] md:max-w-[760px] lg:max-w-[960px] xl:max-w-[1140px] 2xl:max-w-[1280px] min-h-screen bg-background pb-32">
         <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-4 py-3 flex items-center gap-3">
-          <button onClick={onClose} className="w-10 h-10 grid place-items-center rounded-full hover:bg-muted tap" aria-label="Tutup">
+          <button onClick={onClose} className="w-10 h-10 grid place-items-center rounded-full hover:bg-muted tap" aria-label={t("back")}>
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1">
-            <h1 className="text-lg font-extrabold leading-tight">Ramalan Jualan 7 Hari</h1>
-            <p className="text-xs text-muted-foreground">AI belajar dari rekod {boss}</p>
+            <h1 className="text-lg font-extrabold leading-tight">{t("sf_title")}</h1>
+            <p className="text-xs text-muted-foreground">{t("sf_subtitle")} {boss}</p>
           </div>
         </header>
 
@@ -206,19 +208,19 @@ export function SalesForecast({
           <div className="px-5 py-10 space-y-5">
             <div className="rounded-3xl p-6 bg-card border border-border text-center space-y-3 animate-fade-in">
               <div className="text-5xl">📊</div>
-              <h2 className="text-lg font-extrabold">Belum cukup data, {boss}</h2>
+              <h2 className="text-lg font-extrabold">{t("sf_notEnoughTitle")}, {boss}</h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                AI perlukan sekurang-kurangnya <span className="font-bold text-foreground">7 hari rekod jualan</span> sebelum boleh buat ramalan yang tepat.
-                Setakat ini Boss dah rekod jualan untuk <span className="font-bold text-primary">{stats.distinctDays} hari</span>.
+                {t("sf_notEnoughDesc1")} <span className="font-bold text-foreground">{t("sf_notEnoughDesc2")}</span> {t("sf_notEnoughDesc3")}
+                {t("sf_notEnoughDesc4")} <span className="font-bold text-primary">{stats.distinctDays} {t("sf_days")}</span>.
               </p>
               <div className="rounded-2xl bg-muted/40 p-4 text-left space-y-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tips:</p>
-                <p className="text-sm">• Rekodkan setiap jualan harian dalam tab <span className="font-bold">+</span></p>
-                <p className="text-sm">• Lagi banyak hari direkod, lagi tepat ramalan AI</p>
-                <p className="text-sm">• Selepas 7 hari, Boss akan nampak ramalan minggu depan dengan automatik 🚀</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("sf_tips")}</p>
+                <p className="text-sm">• {t("sf_tip1")} <span className="font-bold">+</span></p>
+                <p className="text-sm">• {t("sf_tip2")}</p>
+                <p className="text-sm">• {t("sf_tip3")} 🚀</p>
               </div>
               <Button onClick={onClose} className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold mt-2">
-                OK, faham
+                {t("sf_okUnderstand")}
               </Button>
             </div>
           </div>
@@ -227,23 +229,23 @@ export function SalesForecast({
             {/* Badges */}
             <div className="flex flex-wrap gap-2">
               <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-3 py-1.5 rounded-full bg-primary/10 text-primary">
-                <Sparkles className="w-3 h-3" /> Berdasarkan {stats.distinctDays} hari rekod sebenar
+                <Sparkles className="w-3 h-3" /> {t("sf_basedOn")} {stats.distinctDays} {t("sf_realRecords")}
               </span>
               {accuracy ? (
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-3 py-1.5 rounded-full bg-profit/10 text-profit">
-                  <CheckCircle2 className="w-3 h-3" /> Ketepatan AI: {accuracy.avgAccuracy}% ({accuracy.sampleSize} ramalan lepas)
+                  <CheckCircle2 className="w-3 h-3" /> {t("sf_aiAccuracy")} {accuracy.avgAccuracy}% ({accuracy.sampleSize} {t("sf_pastForecasts")})
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-3 py-1.5 rounded-full bg-muted text-muted-foreground">
-                  <LineChartIcon className="w-3 h-3" /> Ketepatan akan dikira selepas beberapa minggu
+                  <LineChartIcon className="w-3 h-3" /> {t("sf_accuracyPending")}
                 </span>
               )}
               <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-3 py-1.5 rounded-full bg-accent/15 text-accent-foreground">
-                <Activity className="w-3 h-3" /> Selang keyakinan 85% · noise {Math.round(stats.noiseCV * 100)}%
+                <Activity className="w-3 h-3" /> {t("sf_confidence85")} {Math.round(stats.noiseCV * 100)}%
               </span>
               {weather && (
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-3 py-1.5 rounded-full bg-muted text-foreground">
-                  ☁️ Cuaca langsung — Open-Meteo
+                  ☁️ {t("sf_weatherLive")}
                 </span>
               )}
             </div>
@@ -256,22 +258,22 @@ export function SalesForecast({
                 </div>
                 <div className="flex-1">
                   <p className="font-bold text-sm text-cost">
-                    Amaran cuaca: {stormDay.weather.label} {stormDay.weather.emoji} pada {stormDay.dayName}
+                    {t("sf_weatherAlertLabel")} {stormDay.weather.label} {stormDay.weather.emoji} {t("sf_weatherAlertOn")} {stormDay.dayName}
                   </p>
                   <p className="text-xs text-foreground/80 mt-1 leading-relaxed">
-                    AI menurunkan jangkaan trafik {boss} sebanyak {Math.round(Math.abs(stormDay.weather.trafficAdjust) * 100)}%.
-                    Cadangan: kurangkan stok ringan dan sediakan promo last-call.
+                    {t("sf_weatherAlertDesc1")} {boss} {t("sf_weatherAlertDesc2")} {Math.round(Math.abs(stormDay.weather.trafficAdjust) * 100)}%.
+                    {" "}{t("sf_weatherAlertDesc3")}
                   </p>
                 </div>
               </div>
             )}
             {weatherError && (
-              <p className="text-xs text-muted-foreground italic">Cuaca tidak dapat diambil — ramalan jalan tanpa pelarasan cuaca.</p>
+              <p className="text-xs text-muted-foreground italic">{t("sf_weatherError")}</p>
             )}
 
             {/* 7-day strip */}
             <section className="space-y-2">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Ramalan 7 Hari</h2>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{t("sf_7dayHeading")}</h2>
               <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
                 {days.map((d) => {
                   const meta = LEVEL_META[d.level];
@@ -293,7 +295,7 @@ export function SalesForecast({
                         {w && <span className="text-base leading-none" title={`${w.label} · ${Math.round(w.tMax)}°`}>{w.emoji}</span>}
                       </div>
                       <span className={`mt-2 inline-block text-[9px] font-bold px-2 py-0.5 rounded-full ${meta.chipClass}`}>
-                        {meta.emoji} {meta.label}
+                        {meta.emoji} {t(meta.labelKey)}
                       </span>
                       <p className="text-base font-extrabold mt-1">{fmt(d.expected)}</p>
                       <p className="text-[9px] text-muted-foreground leading-tight mt-0.5">
@@ -307,7 +309,7 @@ export function SalesForecast({
                 })}
               </div>
               {weatherLoading && (
-                <p className="text-[11px] text-muted-foreground italic">Mengambil cuaca terkini untuk {boss}…</p>
+                <p className="text-[11px] text-muted-foreground italic">{t("sf_fetchingWeather")} {boss}…</p>
               )}
             </section>
 
@@ -317,21 +319,21 @@ export function SalesForecast({
                 <div>
                   <p className="text-xs text-muted-foreground font-semibold">📅 {detail.dayName}, {detail.dateLabel}</p>
                   <p className="text-base font-extrabold mt-1">
-                    {LEVEL_META[detail.level].emoji} {LEVEL_META[detail.level].label} — Dijangka <span className="text-primary">{fmt(detail.expected)}</span>
+                    {LEVEL_META[detail.level].emoji} {t(LEVEL_META[detail.level].labelKey)} — {t("sf_expected")} <span className="text-primary">{fmt(detail.expected)}</span>
                   </p>
                   <div className="mt-2 rounded-xl bg-accent/10 border border-accent/30 p-3">
                     <p className="text-xs font-bold uppercase tracking-wider text-accent-foreground/80 flex items-center gap-1">
-                      <Activity className="w-3 h-3" /> Model AI berkemungkinan
+                      <Activity className="w-3 h-3" /> {t("sf_aiModelTitle")}
                     </p>
                     <p className="text-sm mt-1 leading-relaxed">
-                      Boss, ada <span className="font-extrabold">{detail.probHit}% kemungkinan</span> capai{" "}
+                      {boss}, {t("sf_aiProb1")} <span className="font-extrabold">{detail.probHit}% {t("sf_aiProb2")}</span> {t("sf_aiProb3")}{" "}
                       <span className="font-extrabold text-primary">{fmt(detail.expected)}</span>
-                      {" "}— sediakan untuk julat <span className="font-semibold">{fmt(detail.low)}–{fmt(detail.high)}</span>.
+                      {" "}— {t("sf_aiPrepRange")} <span className="font-semibold">{fmt(detail.low)}–{fmt(detail.high)}</span>.
                     </p>
                     {detail.weather && detail.weather.severity !== "ok" && (
                       <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
                         <CloudRain className="w-3 h-3" /> {detail.weather.label} {detail.weather.emoji}
-                        {" "}({detail.weather.trafficAdjust >= 0 ? "+" : ""}{Math.round(detail.weather.trafficAdjust * 100)}% trafik)
+                        {" "}({detail.weather.trafficAdjust >= 0 ? "+" : ""}{Math.round(detail.weather.trafficAdjust * 100)}% {t("sf_traffic")})
                       </p>
                     )}
                   </div>
@@ -339,7 +341,7 @@ export function SalesForecast({
 
                 {detail.reasons.length > 0 && (
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Sebab AI buat ramalan ini:</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">{t("sf_whyAI")}</p>
                     <ul className="space-y-1">
                       {detail.reasons.map((r, i) => (
                         <li key={i} className="text-sm flex gap-2"><span className="text-primary">•</span>{r}</li>
@@ -350,7 +352,7 @@ export function SalesForecast({
 
                 {detail.stock.length > 0 ? (
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Stok yang {boss} perlu sediakan:</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">{t("sf_stockNeeded")} {boss} {t("sf_stockNeededSuffix")}</p>
                     <div className="space-y-1.5">
                       {detail.stock.map((s) => (
                         <div key={s.name} className="flex items-center justify-between text-sm rounded-xl bg-muted/40 px-3 py-2">
@@ -362,13 +364,13 @@ export function SalesForecast({
                   </div>
                 ) : (
                   <p className="text-xs text-muted-foreground italic">
-                    Tiada ramalan stok — Boss belum set produk & bahan dalam Profil.
+                    {t("sf_noStock")}
                   </p>
                 )}
 
                 {detail.stock.length > 0 && (
                   <Button onClick={handleSendDayToBuy} className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold">
-                    <ShoppingCart className="w-4 h-4 mr-2" /> Tambah ke Senarai Nak Beli
+                    <ShoppingCart className="w-4 h-4 mr-2" /> {t("sf_addToBuy")}
                   </Button>
                 )}
               </section>
@@ -376,23 +378,23 @@ export function SalesForecast({
 
             {/* Pattern insights */}
             <section className="space-y-2">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Corak dari Rekod {boss}</h2>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{t("sf_patternsHeading")} {boss}</h2>
               {(() => {
                 const idxBest = stats.perWeekdayAvg.reduce((bi, v, i, a) => (v > a[bi] ? i : bi), 0);
                 const idxWorst = stats.perWeekdayAvg.reduce((bi, v, i, a) => (v < a[bi] ? i : bi), 0);
                 return (
                   <>
                     <InsightCard icon={<Trophy className="w-5 h-5 text-warn" />}
-                      title={`Hari Terbaik ${boss}`}
-                      desc={`${DAY_NAMES_MS[idxBest]} adalah hari paling kuat — purata ${fmt(stats.perWeekdayAvg[idxBest])}.`}
+                      title={`${t("sf_bestDay")} ${boss}`}
+                      desc={`${DAY_NAMES_MS[idxBest]} ${t("sf_bestDayDesc")} ${fmt(stats.perWeekdayAvg[idxBest])}.`}
                       bg="bg-warn-soft border-warn/30" />
                     <InsightCard icon={<Clock className="w-5 h-5 text-primary" />}
-                      title="Hari Perlahan"
-                      desc={`${DAY_NAMES_MS[idxWorst]} biasanya paling perlahan — purata ${fmt(stats.perWeekdayAvg[idxWorst])}. Sesuai untuk rest atau persiapan stok.`}
+                      title={t("sf_slowDay")}
+                      desc={`${DAY_NAMES_MS[idxWorst]} ${t("sf_slowDayDesc")} ${fmt(stats.perWeekdayAvg[idxWorst])}. ${t("sf_slowDayTip")}`}
                       bg="bg-primary/10 border-primary/30" />
                     <InsightCard icon={<TrendingUp className="w-5 h-5 text-profit" />}
-                      title="Purata Harian"
-                      desc={`Sepanjang ${stats.distinctDays} hari rekod, purata jualan harian ${boss} ialah ${fmt(stats.baseline)}.`}
+                      title={t("sf_dailyAvg")}
+                      desc={`${t("sf_dailyAvgDesc1")} ${stats.distinctDays} ${t("sf_dailyAvgDesc2")} ${boss} ${t("sf_dailyAvgDesc3")} ${fmt(stats.baseline)}.`}
                       bg="bg-profit/10 border-profit/30" />
                   </>
                 );
@@ -402,22 +404,22 @@ export function SalesForecast({
             {/* Weekly summary */}
             <section className="rounded-2xl p-5 bg-gradient-profit text-profit-foreground shadow-glow space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider opacity-90">
-                <ChartBar className="w-4 h-4" /> Jangkaan Hasil Minggu Ini
+                <ChartBar className="w-4 h-4" /> {t("sf_weekSummaryTitle")}
               </div>
               <div className="space-y-1.5 text-sm">
-                <Row label="Jualan dijangka" value={fmt(totalRevenue)} />
-                <Row label="Kos bahan (anggaran 45%)" value={fmt(matCost)} />
-                <Row label="Keuntungan dijangka" value={fmt(profit)} />
+                <Row label={t("sf_projectedSales")} value={fmt(totalRevenue)} />
+                <Row label={t("sf_materialCost")} value={fmt(matCost)} />
+                <Row label={t("sf_projectedProfit")} value={fmt(profit)} />
               </div>
               <p className="text-xs italic opacity-95 pt-2 border-t border-white/20">
-                {boss} perlu sediakan modal beli bahan: <span className="font-bold">{fmt(matCost)}</span> sebelum minggu mula.
+                {boss} {t("sf_capitalNote")} <span className="font-bold">{fmt(matCost)}</span> {t("sf_capitalNote2")}
               </p>
             </section>
 
             {/* Weekly checklist */}
             {weeklyChecklist.length > 0 && (
               <section className="space-y-3">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Senarai Persiapan Minggu Ini</h2>
+                <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{t("sf_weekChecklistTitle")}</h2>
                 <div className="rounded-2xl bg-card border border-border p-2 shadow-sm">
                   {weeklyChecklist.map((w, i) => {
                     const isChecked = checked.has(w.name);
@@ -437,7 +439,7 @@ export function SalesForecast({
                         <span className="text-lg">{w.emoji}</span>
                         <div className="flex-1">
                           <p className={`text-sm font-semibold ${isChecked ? "line-through text-muted-foreground" : ""}`}>
-                            Beli {w.name} — {w.total} {w.unit} {i === 0 && <span className="text-cost">(paling penting!)</span>}
+                            {t("sf_buyItem")} {w.name} — {w.total} {w.unit} {i === 0 && <span className="text-cost">({t("sf_mostImportant")})</span>}
                           </p>
                         </div>
                       </button>
@@ -445,7 +447,7 @@ export function SalesForecast({
                   })}
                 </div>
                 <Button onClick={handleSendWeekToBuy} className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold">
-                  <ShoppingCart className="w-4 h-4 mr-2" /> Hantar ke Nak Beli
+                  <ShoppingCart className="w-4 h-4 mr-2" /> {t("sf_sendToShopList")}
                 </Button>
               </section>
             )}
@@ -453,14 +455,14 @@ export function SalesForecast({
             {/* AI summary */}
             <section className="rounded-2xl p-5 bg-gradient-income text-white shadow-card space-y-2">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider opacity-90">
-                <Sparkles className="w-4 h-4" /> Mesej AI
+                <Sparkles className="w-4 h-4" /> {t("sf_aiMessageTitle")}
               </div>
               <p className="text-sm leading-relaxed">
-                {boss}, berdasarkan {stats.distinctDays} hari rekod, minggu depan dijangka bawa pulangan sekitar <span className="font-extrabold">{fmt(totalRevenue)}</span>.
-                Hari paling sibuk: <span className="font-extrabold">{days.reduce((b, d) => d.expected > b.expected ? d : b, days[0]).dayName}</span>.
+                {boss}, {t("sf_aiMsg1")} {stats.distinctDays} {t("sf_aiMsg2")} <span className="font-extrabold">{fmt(totalRevenue)}</span>.
+                {" "}{t("sf_aiMsg3")} <span className="font-extrabold">{days.reduce((b, d) => d.expected > b.expected ? d : b, days[0]).dayName}</span>.
               </p>
               <p className="text-sm leading-relaxed pt-2 border-t border-white/20">
-                Teruskan rekod setiap hari — lagi banyak data, lagi tepat ramalan AI Boss. 💪
+                {t("sf_aiMsg4")} 💪
               </p>
             </section>
           </div>

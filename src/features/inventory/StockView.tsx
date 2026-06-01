@@ -4,10 +4,28 @@ import type { StockItem, Product } from "@/types";
 import { fmtQty } from "@/lib/format";
 import { emojiForItem } from "@/lib/stockEmoji";
 import { levelOf } from "@/features/inventory/stockLevel";
+import { useTranslation } from "@/context/LanguageContext";
 
 const isLow = (s: StockItem) => {
   const lvl = levelOf(s);
   return lvl === "habis" || lvl === "sedikit";
+};
+
+type TFn = (key: string) => string;
+
+const relTime = (iso: string | undefined, t: TFn): string | null => {
+  if (!iso) return null;
+  const ms = Date.now() - new Date(iso).getTime();
+  if (ms < 0) return t("sv_justNow");
+  const mins = Math.floor(ms / 60000);
+  if (mins < 1) return t("sv_justNow");
+  if (mins < 60) return t("sv_minsAgo").replace("{n}", String(mins));
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return t("sv_hrsAgo").replace("{n}", String(hrs));
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return t("sv_daysAgo").replace("{n}", String(days));
+  const wks = Math.floor(days / 7);
+  return t("sv_wksAgo").replace("{n}", String(wks));
 };
 
 export const StockView = ({
@@ -23,6 +41,7 @@ export const StockView = ({
   onDelete?: (id: string) => void;
   onGoToBuy: () => void;
 }) => {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -36,13 +55,13 @@ export const StockView = ({
     return (
       <div className="px-5 pt-6 pb-6">
         <header className="animate-fade-in mb-5">
-          <h1 className="text-2xl font-extrabold tracking-tight">Stok 📦</h1>
-          <p className="text-sm text-muted-foreground mt-1">Pengurusan Inventori</p>
+          <h1 className="text-2xl font-extrabold tracking-tight">{t("sv_stockTitle")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("sv_stockInventorySubtitle")}</p>
         </header>
         <div className="rounded-2xl p-8 bg-surface border border-border text-center space-y-3">
           <div className="text-4xl">📭</div>
           <p className="font-bold text-sm">
-            Tiada stok. Sila tambah produk dalam Profil terlebih dahulu.
+            {t("sv_stockNoProducts")}
           </p>
         </div>
       </div>
@@ -52,15 +71,15 @@ export const StockView = ({
   return (
     <div className="px-5 pt-6 space-y-5 pb-6">
       <header className="animate-fade-in">
-        <h1 className="text-2xl font-extrabold tracking-tight">Stok 📦</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("sv_stockTitle")}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Baca sahaja — kemaskini melalui butang Pembelian (+)
+          {t("sv_stockReadOnly")}
         </p>
       </header>
 
       <div className="flex items-center gap-2 flex-wrap">
-        <Chip label="Jumlah" value={stock.length} tone="muted" />
-        <Chip label="Stok Rendah" value={lowCount} tone="warn" />
+        <Chip label={t("total")} value={stock.length} tone="muted" />
+        <Chip label={t("sv_stockLowLabel")} value={lowCount} tone="warn" />
       </div>
 
       {lowCount > 0 && (
@@ -70,8 +89,8 @@ export const StockView = ({
         >
           <AlertTriangle className="w-5 h-5 text-warn shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-sm">{lowCount} item stok rendah!</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Semak Nak Beli →</p>
+            <p className="font-bold text-sm">{t("sv_stockLowAlert").replace("{count}", String(lowCount))}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t("sv_checkBuy")}</p>
           </div>
         </button>
       )}
@@ -81,11 +100,11 @@ export const StockView = ({
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Cari item stok..."
+          placeholder={t("sv_searchStockPh")}
           className="w-full h-11 pl-9 pr-9 rounded-2xl bg-surface border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         />
         {query && (
-          <button onClick={() => setQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2" aria-label="Padam">
+          <button onClick={() => setQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2" aria-label={t("sv_clearSearch")}>
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         )}
@@ -93,7 +112,7 @@ export const StockView = ({
 
       {filtered.length === 0 ? (
         <div className="rounded-2xl p-8 bg-surface border border-border text-center">
-          <p className="text-sm text-muted-foreground">Tiada item dijumpai</p>
+          <p className="text-sm text-muted-foreground">{t("sv_noItemFound")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3">
@@ -102,21 +121,6 @@ export const StockView = ({
       )}
     </div>
   );
-};
-
-const relTime = (iso?: string) => {
-  if (!iso) return null;
-  const ms = Date.now() - new Date(iso).getTime();
-  if (ms < 0) return "baru";
-  const mins = Math.floor(ms / 60000);
-  if (mins < 1) return "baru";
-  if (mins < 60) return `${mins} min lalu`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs} jam lalu`;
-  const days = Math.floor(hrs / 24);
-  if (days < 7) return `${days} hari lalu`;
-  const wks = Math.floor(days / 7);
-  return `${wks} mgg lalu`;
 };
 
 const bgForCategory = (cat?: string) => {
@@ -129,9 +133,10 @@ const bgForCategory = (cat?: string) => {
 };
 
 const StockCard = ({ item, onSave }: { item: StockItem; onSave?: (item: StockItem) => void }) => {
+  const { t } = useTranslation();
   const low = isLow(item);
-  const restocked = relTime(item.lastRestockedAt);
-  const used = relTime(item.lastUsedAt);
+  const restocked = relTime(item.lastRestockedAt, t);
+  const used = relTime(item.lastUsedAt, t);
   const emoji = item.emoji || emojiForItem(item.name);
   const bgClass = bgForCategory(item.category);
   const [editing, setEditing] = useState(false);
@@ -170,17 +175,17 @@ const StockCard = ({ item, onSave }: { item: StockItem; onSave?: (item: StockIte
               onClick={save}
               className="flex-1 h-8 rounded-lg bg-primary text-primary-foreground text-xs font-bold tap inline-flex items-center justify-center gap-1"
             >
-              <Check className="w-3 h-3" /> Simpan
+              <Check className="w-3 h-3" /> {t("sv_saveBtn")}
             </button>
             <button
               onClick={() => setEditing(false)}
               className="flex-1 h-8 rounded-lg bg-muted text-xs font-bold tap inline-flex items-center justify-center gap-1"
             >
-              <XIcon className="w-3 h-3" /> Batal
+              <XIcon className="w-3 h-3" /> {t("no")}
             </button>
           </div>
           <p className="text-[9px] text-muted-foreground leading-tight">
-            Laras Stok (rosak / peribadi / tumpah)
+            {t("sv_adjustStockHint")}
           </p>
         </div>
       ) : (
@@ -191,31 +196,31 @@ const StockCard = ({ item, onSave }: { item: StockItem; onSave?: (item: StockIte
           {low ? (
             <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warn-soft text-warn border border-warn/30 text-[10px] font-bold">
               <AlertTriangle className="w-3 h-3" />
-              Stok rendah
+              {t("sv_stockLowBadge")}
             </div>
           ) : (
-            <div className="text-[10px] text-muted-foreground">Stok cukup</div>
+            <div className="text-[10px] text-muted-foreground">{t("sv_stockOkText")}</div>
           )}
           {onSave && (
             <button
               onClick={startEdit}
               className="inline-flex items-center gap-1 text-[10px] font-bold text-primary tap"
-              aria-label="Laras stok"
+              aria-label={t("sv_adjustStock")}
             >
-              <Pencil className="w-3 h-3" /> Laras
+              <Pencil className="w-3 h-3" /> {t("sv_adjust")}
             </button>
           )}
           {(restocked || used) && (
             <div className="w-full pt-1.5 mt-1 border-t border-border/60 space-y-0.5">
               {restocked && (
                 <div className="text-[10px] text-muted-foreground flex items-center justify-between gap-1">
-                  <span>↑ Tambah</span>
+                  <span>{t("sv_restock")}</span>
                   <span className="font-semibold">{restocked}</span>
                 </div>
               )}
               {used && (
                 <div className="text-[10px] text-muted-foreground flex items-center justify-between gap-1">
-                  <span>↓ Guna</span>
+                  <span>{t("sv_used")}</span>
                   <span className="font-semibold">{used}</span>
                 </div>
               )}

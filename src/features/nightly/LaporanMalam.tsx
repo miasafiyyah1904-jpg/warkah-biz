@@ -32,6 +32,7 @@ import {
   type ActionItemRow,
 } from "./nightlyReportApi";
 import type { Txn, OpExEntry, StockItem } from "@/types";
+import { useTranslation } from "@/context/LanguageContext";
 
 const addressBoss = (b: string) => (b?.trim() ? b.trim() : "Boss");
 const isBefore8PM = () => new Date().getHours() < 20;
@@ -53,6 +54,7 @@ interface Props {
 }
 
 export function LaporanMalam({ onClose, businessName, txns, opex, stock }: Props) {
+  const { t } = useTranslation();
   const boss = addressBoss(businessName);
   const [view, setView] = useState<"report" | "history">("report");
   const [historyDate, setHistoryDate] = useState<string | null>(null);
@@ -171,7 +173,7 @@ export function LaporanMalam({ onClose, businessName, txns, opex, stock }: Props
       await markReportRead(baseRow.id);
     } catch (e) {
       console.error("generate report failed", e);
-      toast.error("Gagal jana laporan. Cuba lagi.");
+      toast.error(t("lm_reportError"));
     } finally {
       setGenerating(false);
       setAiLoading(false);
@@ -323,6 +325,7 @@ interface ReportContentProps {
 }
 
 function ReportContent(p: ReportContentProps) {
+  const { t } = useTranslation();
   const r = p.report;
   const agg = p.aggregate;
   const weeklyPct = p.weeklyTarget > 0 ? (agg.weeklyRevenue / p.weeklyTarget) * 100 : 0;
@@ -427,10 +430,10 @@ function ReportContent(p: ReportContentProps) {
       doc.setFontSize(9);
       doc.text("Dijana oleh WarkahBiz App", 14, 290);
       doc.save(`Laporan-${agg.reportDate}.pdf`);
-      toast.success("PDF dimuat turun ✅");
+      toast.success(t("lm_pdfSuccess"));
     } catch (e) {
       console.error(e);
-      toast.error("Gagal jana PDF.");
+      toast.error(t("lm_pdfError"));
     }
   };
 
@@ -438,14 +441,14 @@ function ReportContent(p: ReportContentProps) {
     <div className="fixed inset-0 z-40 bg-background overflow-y-auto animate-fade-in">
       <div className="mx-auto w-full max-w-full sm:max-w-[600px] md:max-w-[760px] lg:max-w-[960px] min-h-screen pb-32">
         <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-4 py-3 flex items-center gap-2">
-          <button onClick={p.onClose} className="w-10 h-10 grid place-items-center rounded-full hover:bg-muted tap" aria-label="Tutup">
+          <button onClick={p.onClose} className="w-10 h-10 grid place-items-center rounded-full hover:bg-muted tap" aria-label={t("lm_close")}>
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1">
-            <h1 className="text-lg font-extrabold leading-tight">Laporan Malam</h1>
+            <h1 className="text-lg font-extrabold leading-tight">{t("lm_pageTitle")}</h1>
             <p className="text-xs text-muted-foreground">{r ? formatDateLong(r.report_date) : formatDateLong(agg.reportDate)}</p>
           </div>
-          <button onClick={p.onOpenHistory} className="w-10 h-10 grid place-items-center rounded-full hover:bg-muted tap" aria-label="Sejarah">
+          <button onClick={p.onOpenHistory} className="w-10 h-10 grid place-items-center rounded-full hover:bg-muted tap" aria-label={t("lm_historyAriaLabel")}>
             <History className="w-5 h-5" />
           </button>
         </header>
@@ -454,13 +457,13 @@ function ReportContent(p: ReportContentProps) {
           {p.beforeReportTime && (
             <div className="rounded-2xl p-3 bg-primary/10 border border-primary/30 text-xs flex items-start gap-2">
               <span className="flex-1">
-                ⏰ Laporan biasanya dijana selepas 8 malam. Anda boleh jana lebih awal jika gerai sudah tutup.
+                {t("lm_earlyBanner")}
               </span>
               {p.onDismissEarlyBanner && (
                 <button
                   onClick={p.onDismissEarlyBanner}
                   className="text-xs font-bold text-primary tap shrink-0"
-                  aria-label="Tutup amaran"
+                  aria-label={t("lm_dismissAlert")}
                 >
                   ✕
                 </button>
@@ -471,15 +474,15 @@ function ReportContent(p: ReportContentProps) {
           {p.noDataToday && !r && (
             <div className="rounded-2xl p-5 bg-warn-soft border border-warn/30 text-center space-y-3">
               <p className="text-3xl">📭</p>
-              <p className="font-bold">{p.boss} belum rekod jualan hari ini.</p>
+              <p className="font-bold">{p.boss} {t("lm_noSalesTitle")}</p>
               <p className="text-xs text-muted-foreground">
-                Laporan akan dijana selepas {p.boss} tambah rekod jualan pertama hari ini.
+                {t("lm_noSalesHint").replace("{boss}", p.boss)}
               </p>
               <button
                 onClick={p.onClose}
                 className="inline-flex items-center gap-2 h-11 px-5 rounded-2xl bg-primary text-primary-foreground font-bold tap"
               >
-                <Plus className="w-4 h-4" /> Rekod Jualan Sekarang
+                <Plus className="w-4 h-4" /> {t("lm_recordSalesNow")}
               </button>
             </div>
           )}
@@ -488,7 +491,7 @@ function ReportContent(p: ReportContentProps) {
             <>
               {/* Hero */}
               <section className="rounded-2xl p-5 bg-gradient-profit text-profit-foreground shadow-glow">
-                <p className="text-xs font-bold uppercase tracking-wider opacity-90">Untung Bersih Hari Ini</p>
+                <p className="text-xs font-bold uppercase tracking-wider opacity-90">{t("lm_netProfitToday")}</p>
                 <p className="text-4xl font-extrabold mt-2">{fmt(agg.netProfit)}</p>
                 <div className="mt-4 grid grid-cols-3 gap-2 text-center">
                   <Stat
@@ -496,8 +499,8 @@ function ReportContent(p: ReportContentProps) {
                     value={fmt(agg.totalSales)}
                     delta={agg.salesChangePct}
                   />
-                  <Stat label="Belanja" value={fmt(agg.totalExpenses)} delta={agg.expenseChangePct} invert />
-                  <Stat label="Transaksi" value={String(agg.transactionCount)} />
+                  <Stat label={t("lm_expenses")} value={fmt(agg.totalExpenses)} delta={agg.expenseChangePct} invert />
+                  <Stat label={t("lm_transactions")} value={String(agg.transactionCount)} />
                 </div>
               </section>
 
@@ -505,7 +508,7 @@ function ReportContent(p: ReportContentProps) {
               <section className="rounded-2xl bg-card border border-border p-4 shadow-card space-y-2">
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-bold flex items-center gap-2">
-                    <TargetIcon className="w-4 h-4 text-primary" /> Target Minggu
+                    <TargetIcon className="w-4 h-4 text-primary" /> {t("lm_weeklyTarget")}
                   </h2>
                   <input
                     type="number"
@@ -532,7 +535,7 @@ function ReportContent(p: ReportContentProps) {
                 "bg-primary/10 border-primary/30"
               }`}>
                 <div className="flex items-center justify-between mb-1">
-                  <h2 className="text-sm font-bold">Bajet Belanja Minggu</h2>
+                  <h2 className="text-sm font-bold">{t("lm_weeklyBudget")}</h2>
                   <input
                     type="number"
                     value={p.weeklyBudget}
@@ -542,9 +545,9 @@ function ReportContent(p: ReportContentProps) {
                 </div>
                 <p className="text-xs">
                   {fmt(agg.weeklyExpenses)} / {fmt(p.weeklyBudget)} ({spendingPct.toFixed(0)}%)
-                  {spendStatus === "red" && " — ⚠️ Belanja terlalu tinggi!"}
-                  {spendStatus === "amber" && " — Boss kena pantau."}
-                  {spendStatus === "green" && " — Bagus, dalam kawalan."}
+                  {spendStatus === "red" && ` ${t("lm_spendTooHigh")}`}
+                  {spendStatus === "amber" && ` ${t("lm_spendWatch")}`}
+                  {spendStatus === "green" && ` ${t("lm_spendOk")}`}
                 </p>
               </section>
 
@@ -552,20 +555,20 @@ function ReportContent(p: ReportContentProps) {
               {(agg.criticalItems.length > 0 || agg.lowItems.length > 0) && (
                 <section className="rounded-2xl bg-card border border-border p-4 shadow-card space-y-2">
                   <h2 className="text-sm font-bold flex items-center gap-2">
-                    <Package className="w-4 h-4" /> Stok Perlu Perhatian
+                    <Package className="w-4 h-4" /> {t("lm_stockAlert")}
                   </h2>
                   {agg.criticalItems.map((i) => (
                     <div key={i.name} className="flex items-center gap-2 text-xs">
                       <span className="w-2 h-2 rounded-full bg-cost" />
                       <span className="font-bold">{i.name}</span>
-                      <span className="text-muted-foreground">— {i.qty} {i.unit} (kritikal)</span>
+                      <span className="text-muted-foreground">— {i.qty} {i.unit} ({t("lm_critical")})</span>
                     </div>
                   ))}
                   {agg.lowItems.map((i) => (
                     <div key={i.name} className="flex items-center gap-2 text-xs">
                       <span className="w-2 h-2 rounded-full bg-warn" />
                       <span className="font-bold">{i.name}</span>
-                      <span className="text-muted-foreground">— {i.qty} {i.unit} (rendah)</span>
+                      <span className="text-muted-foreground">— {i.qty} {i.unit} ({t("lm_low")})</span>
                     </div>
                   ))}
                 </section>
@@ -577,7 +580,7 @@ function ReportContent(p: ReportContentProps) {
               {/* Tomorrow's actions */}
               {p.actions.length > 0 && (
                 <section className="rounded-2xl bg-card border border-border p-4 shadow-card space-y-2">
-                  <h2 className="text-sm font-bold">📋 Tindakan Esok</h2>
+                  <h2 className="text-sm font-bold">{t("lm_tomorrowActions")}</h2>
                   {p.actions.map((a) => (
                     <label key={a.id} className="flex items-start gap-2 py-2 cursor-pointer">
                       <input
@@ -605,7 +608,7 @@ function ReportContent(p: ReportContentProps) {
               )}
               {p.generating && (
                 <div className="flex items-center justify-center gap-2 py-3 text-sm text-muted-foreground">
-                  <Loader2 className="w-4 h-4 animate-spin" /> Sedang jana laporan...
+                  <Loader2 className="w-4 h-4 animate-spin" /> {t("lm_generating")}
                 </div>
               )}
 
@@ -643,12 +646,13 @@ function AISection({
   error: string | null;
   boss: string;
 }) {
+  const { t } = useTranslation();
   if (loading) {
     return (
       <section className="rounded-2xl p-5 bg-gradient-income text-white shadow-card">
         <div className="flex items-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin" />
-          <p className="text-sm font-bold">AI sedang menganalisis hari {boss}...</p>
+          <p className="text-sm font-bold">{t("lm_aiAnalysing").replace("{boss}", boss)}</p>
         </div>
       </section>
     );
@@ -656,7 +660,7 @@ function AISection({
   if (error || !report?.ai_summary) {
     return (
       <section className="rounded-2xl p-4 bg-muted/30 border border-border text-xs text-muted-foreground">
-        Analisis AI tidak tersedia sekarang. Data masih tepat.
+        {t("lm_aiUnavailable")}
       </section>
     );
   }
@@ -664,18 +668,18 @@ function AISection({
     <div className="space-y-3">
       <section className="rounded-2xl p-5 bg-gradient-income text-white shadow-card space-y-2">
         <p className="text-xs font-bold uppercase tracking-wider opacity-90 flex items-center gap-1">
-          <Sparkles className="w-4 h-4" /> Ringkasan AI
+          <Sparkles className="w-4 h-4" /> {t("lm_aiSummary")}
         </p>
         <p className="text-sm leading-relaxed">{report.ai_summary}</p>
       </section>
       {report.ai_achievement && (
-        <Card icon={<Trophy className="w-5 h-5 text-primary" />} title="Pencapaian Hari Ini" desc={report.ai_achievement} bg="bg-primary/8 border-primary/25" />
+        <Card icon={<Trophy className="w-5 h-5 text-primary" />} title={t("lm_todayAchievement")} desc={report.ai_achievement} bg="bg-primary/8 border-primary/25" />
       )}
       {report.ai_warning && (
-        <Card icon={<AlertTriangle className="w-5 h-5 text-warn" />} title="Perlu Perhatian" desc={report.ai_warning} bg="bg-warn-soft border-warn/30" />
+        <Card icon={<AlertTriangle className="w-5 h-5 text-warn" />} title={t("lm_needsAttention")} desc={report.ai_warning} bg="bg-warn-soft border-warn/30" />
       )}
       {report.ai_motivation && (
-        <Card icon={<CheckCircle2 className="w-5 h-5 text-primary" />} title={`Untuk ${boss}`} desc={report.ai_motivation} bg="bg-primary/10 border-primary/30" />
+        <Card icon={<CheckCircle2 className="w-5 h-5 text-primary" />} title={t("lm_forBoss").replace("{boss}", boss)} desc={report.ai_motivation} bg="bg-primary/10 border-primary/30" />
       )}
     </div>
   );
@@ -683,6 +687,7 @@ function AISection({
 
 // ============= History view =============
 function HistoryView({ onBack, onSelect, onClose }: { onBack: () => void; onSelect: (date: string) => void; onClose: () => void }) {
+  const { t } = useTranslation();
   const [reports, setReports] = useState<NightlyReportRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -713,8 +718,8 @@ function HistoryView({ onBack, onSelect, onClose }: { onBack: () => void; onSele
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1">
-            <h1 className="text-lg font-extrabold leading-tight">Rekod Laporan</h1>
-            <p className="text-xs text-muted-foreground">Sejarah laporan malam</p>
+            <h1 className="text-lg font-extrabold leading-tight">{t("lm_historyTitle")}</h1>
+            <p className="text-xs text-muted-foreground">{t("lm_historySubtitle")}</p>
           </div>
           <button onClick={onClose} className="text-xs font-bold text-muted-foreground tap">Tutup</button>
         </header>
@@ -723,26 +728,26 @@ function HistoryView({ onBack, onSelect, onClose }: { onBack: () => void; onSele
           {stats && (
             <section className="rounded-2xl bg-card border border-border p-4 shadow-card grid grid-cols-3 gap-2 text-center">
               <div>
-                <p className="text-[10px] uppercase font-bold text-muted-foreground">Terbaik bulan ini</p>
+                <p className="text-[10px] uppercase font-bold text-muted-foreground">{t("lm_bestThisMonth")}</p>
                 <p className="text-sm font-extrabold mt-1">{fmt(Number(stats.best.total_sales))}</p>
                 <p className="text-[10px] text-muted-foreground">{formatDateLong(stats.best.report_date).split(",")[0]}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase font-bold text-muted-foreground">Untung purata</p>
+                <p className="text-[10px] uppercase font-bold text-muted-foreground">{t("lm_avgProfit")}</p>
                 <p className="text-sm font-extrabold mt-1">{fmt(stats.avgProfit)}</p>
-                <p className="text-[10px] text-muted-foreground">/ hari</p>
+                <p className="text-[10px] text-muted-foreground">{t("lm_perDay")}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase font-bold text-muted-foreground">Target tercapai</p>
+                <p className="text-[10px] uppercase font-bold text-muted-foreground">{t("lm_targetAchieved")}</p>
                 <p className="text-sm font-extrabold mt-1">{stats.hits} / {stats.total}</p>
-                <p className="text-[10px] text-muted-foreground">hari</p>
+                <p className="text-[10px] text-muted-foreground">{t("days")}</p>
               </div>
             </section>
           )}
 
-          {loading && <p className="text-center text-sm text-muted-foreground py-8">Memuatkan...</p>}
+          {loading && <p className="text-center text-sm text-muted-foreground py-8">{t("lm_loading")}</p>}
           {!loading && reports.length === 0 && (
-            <p className="text-center text-sm text-muted-foreground py-8">Belum ada rekod laporan.</p>
+            <p className="text-center text-sm text-muted-foreground py-8">{t("lm_noReports")}</p>
           )}
 
           <div className="space-y-2">
@@ -762,13 +767,13 @@ function HistoryView({ onBack, onSelect, onClose }: { onBack: () => void; onSele
                       {unread && <span className="w-2 h-2 rounded-full bg-primary" />}
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Jualan <span className="text-primary font-bold">{fmt(Number(r.total_sales))}</span>
+                      {t("lm_sales")} <span className="text-primary font-bold">{fmt(Number(r.total_sales))}</span>
                       {" · "}
-                      Untung <span className={profit >= 0 ? "text-primary font-bold" : "text-cost font-bold"}>{fmt(profit)}</span>
+                      {t("lm_profit")} <span className={profit >= 0 ? "text-primary font-bold" : "text-cost font-bold"}>{fmt(profit)}</span>
                     </p>
                   </div>
                   <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${hitTarget ? "bg-primary/15 text-primary" : "bg-warn-soft text-warn-foreground"}`}>
-                    {hitTarget ? "Tercapai ✅" : "Bawah ⚠️"}
+                    {hitTarget ? t("lm_achieved") : t("lm_below")}
                   </span>
                 </button>
               );
@@ -782,6 +787,7 @@ function HistoryView({ onBack, onSelect, onClose }: { onBack: () => void; onSele
 
 // ============= Past Report view (read-only) =============
 function PastReportView({ date, boss, onBack, onClose }: { date: string; boss: string; onBack: () => void; onClose: () => void }) {
+  const { t } = useTranslation();
   const [report, setReport] = useState<NightlyReportRow | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -801,7 +807,7 @@ function PastReportView({ date, boss, onBack, onClose }: { date: string; boss: s
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1">
-            <h1 className="text-lg font-extrabold leading-tight">Laporan Lalu</h1>
+            <h1 className="text-lg font-extrabold leading-tight">{t("lm_pastReport")}</h1>
             <p className="text-xs text-muted-foreground">{formatDateLong(date)}</p>
           </div>
           <button onClick={onClose} className="text-xs font-bold text-muted-foreground tap">Tutup</button>
@@ -809,15 +815,15 @@ function PastReportView({ date, boss, onBack, onClose }: { date: string; boss: s
 
         <div className="px-4 py-4 space-y-4">
           {loading && <p className="text-center text-sm text-muted-foreground py-8">Memuatkan...</p>}
-          {!loading && !report && <p className="text-center text-sm text-muted-foreground py-8">Tiada rekod untuk tarikh ini.</p>}
+          {!loading && !report && <p className="text-center text-sm text-muted-foreground py-8">{t("lm_noRecord")}</p>}
           {report && (
             <>
               <section className="rounded-2xl p-5 bg-gradient-profit text-profit-foreground shadow-glow">
-                <p className="text-xs font-bold uppercase tracking-wider opacity-90">Untung Bersih</p>
+                <p className="text-xs font-bold uppercase tracking-wider opacity-90">{t("lm_netProfit")}</p>
                 <p className="text-4xl font-extrabold mt-2">{fmt(Number(report.net_profit))}</p>
                 <div className="mt-4 grid grid-cols-2 gap-2 text-center">
-                  <Stat label="Jualan" value={fmt(Number(report.total_sales))} />
-                  <Stat label="Belanja" value={fmt(Number(report.total_expenses))} />
+                  <Stat label={t("lm_sales")} value={fmt(Number(report.total_sales))} />
+                  <Stat label={t("lm_expenses")} value={fmt(Number(report.total_expenses))} />
                 </div>
               </section>
               {report.ai_summary && (
@@ -828,7 +834,7 @@ function PastReportView({ date, boss, onBack, onClose }: { date: string; boss: s
               )}
               {report.ai_recommendations && report.ai_recommendations.length > 0 && (
                 <section className="rounded-2xl bg-card border border-border p-4 space-y-2">
-                  <h2 className="text-sm font-bold">Cadangan AI</h2>
+                  <h2 className="text-sm font-bold">{t("lm_aiRecommendations")}</h2>
                   {report.ai_recommendations.map((c, i) => (
                     <p key={i} className="text-xs">• {c}</p>
                   ))}

@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import type { BusinessHoursSettings, DayKey, OutletSettings } from "@/types";
 import { OUTLET_TYPES } from "@/types";
 import { DAY_KEYS } from "@/types";
+import { useTranslation } from "@/context/LanguageContext";
 
 const DAY_LABEL: Record<DayKey, string> = {
   mon: "Isnin", tue: "Selasa", wed: "Rabu", thu: "Khamis",
@@ -58,6 +59,7 @@ export const OutletView = ({
   businessName: string;
   businessHours: BusinessHoursSettings;
 }) => {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState<OutletSettings>(outlet);
 
   const fallbackName = businessName || "Outlet Saya";
@@ -88,15 +90,15 @@ export const OutletView = ({
 
   const handleSaveInfo = () => {
     onSave(draft);
-    toast.success("Maklumat outlet disimpan");
+    toast.success(t("ov_outlet_info_saved"));
   };
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(shareText);
-      toast.success("Disalin!");
+      toast.success(t("ov_copied"));
     } catch {
-      toast.error("Gagal menyalin");
+      toast.error(t("ov_copy_failed"));
     }
   };
 
@@ -116,14 +118,14 @@ export const OutletView = ({
     <div className="pb-32 px-5 pt-6 space-y-5">
       <div>
         <button onClick={onBack} className="text-xs font-bold text-primary tap mb-1 inline-flex items-center gap-1">
-          <ArrowLeft className="w-3 h-3" /> Kembali ke Profil
+          <ArrowLeft className="w-3 h-3" /> {t("ov_back_to_profile")}
         </button>
-        <h1 className="text-lg font-extrabold">Outlet Saya</h1>
+        <h1 className="text-lg font-extrabold">{t("ov_my_outlet")}</h1>
       </div>
 
       {/* Section A — Status */}
       <div className="rounded-2xl bg-surface border border-border p-4 space-y-3">
-        <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Status Outlet</div>
+        <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t("ov_outlet_status")}</div>
         <div className="flex items-center justify-between gap-3">
           <span
             className={`inline-flex items-center gap-2 px-3 h-9 rounded-full text-sm font-bold ${
@@ -132,20 +134,20 @@ export const OutletView = ({
                 : "bg-cost/15 text-cost"
             }`}
           >
-            {draft.isOpenToday ? "🟢 Buka Sekarang" : "🔴 Tutup Hari Ini"}
+            {draft.isOpenToday ? t("ov_open_now") : t("ov_closed_today")}
           </span>
         </div>
         <div className="flex items-center justify-between gap-3 pt-1">
-          <span className="text-sm font-semibold">Buka hari ini?</span>
+          <span className="text-sm font-semibold">{t("ov_open_today_q")}</span>
           <Switch checked={draft.isOpenToday} onCheckedChange={handleToggleOpen} />
         </div>
         {!draft.isOpenToday && (
-          <Field label="Sebab tutup (pilihan)">
+          <Field label={t("ov_closed_reason")}>
             <input
               value={draft.closedReason || ""}
               onChange={(e) => handleReason(e.target.value.slice(0, 80))}
               maxLength={80}
-              placeholder="Cth: Cuti umum, sakit, hujan lebat"
+              placeholder={t("ov_closed_reason_placeholder")}
               className="w-full h-12 px-4 rounded-2xl bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </Field>
@@ -154,19 +156,19 @@ export const OutletView = ({
 
       {/* Section B — Info form */}
       <div className="rounded-2xl bg-surface border border-border p-4 space-y-3">
-        <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Maklumat Outlet</div>
+        <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t("ov_outlet_info")}</div>
 
-        <Field label="Nama Outlet">
+        <Field label={t("ov_outlet_name")}>
           <input
             value={draft.outletName}
             onChange={(e) => setDraft({ ...draft, outletName: e.target.value.slice(0, 80) })}
             maxLength={80}
-            placeholder="Cth: Warung Kak Ros Cawangan Putrajaya"
+            placeholder={t("ov_outlet_name_placeholder")}
             className="w-full h-12 px-4 rounded-2xl bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </Field>
 
-        <Field label="Jenis Outlet">
+        <Field label={t("ov_outlet_type")}>
           <div className="relative">
             <select
               value={draft.type}
@@ -181,13 +183,13 @@ export const OutletView = ({
           </div>
         </Field>
 
-        <Field label="Alamat">
+        <Field label={t("ov_address")}>
           <textarea
             value={draft.address}
             onChange={(e) => setDraft({ ...draft, address: e.target.value.slice(0, 300) })}
             maxLength={300}
             rows={3}
-            placeholder="Cth: No. 12, Jalan Warisan 3, Presint 8, 62250 Putrajaya"
+            placeholder={t("ov_address_placeholder")}
             className="w-full px-4 py-3 rounded-2xl bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
           />
         </Field>
@@ -196,13 +198,13 @@ export const OutletView = ({
           onClick={handleSaveInfo}
           className="w-full h-12 rounded-2xl bg-gradient-profit text-profit-foreground font-bold tap shadow-card"
         >
-          Simpan
+          {t("save")}
         </button>
       </div>
 
       {/* Section C — Share card */}
       <div className="space-y-3">
-        <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Kad Info Outlet</div>
+        <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t("ov_outlet_card")}</div>
         <div className="rounded-2xl bg-surface border-2 border-dashed border-border p-4">
           <pre className="whitespace-pre-wrap break-words text-sm leading-relaxed font-sans">
 {shareText}
@@ -213,13 +215,13 @@ export const OutletView = ({
             onClick={handleCopy}
             className="h-12 rounded-2xl bg-surface border border-border flex items-center justify-center gap-2 tap text-sm font-bold"
           >
-            <Copy className="w-4 h-4" /> Salin Teks
+            <Copy className="w-4 h-4" /> {t("ov_copy_text")}
           </button>
           <button
             onClick={handleShare}
             className="h-12 rounded-2xl bg-surface border border-border flex items-center justify-center gap-2 tap text-sm font-bold"
           >
-            <Share2 className="w-4 h-4" /> Kongsi
+            <Share2 className="w-4 h-4" /> {t("ov_share")}
           </button>
         </div>
       </div>

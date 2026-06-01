@@ -1,3 +1,5 @@
+// ============= Full file contents =============
+
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Camera, X, ChevronDown, HelpCircle, Clock, Wallet, Calculator, Store, UtensilsCrossed, Truck } from "lucide-react";
@@ -10,6 +12,7 @@ import { OutletView } from "@/features/profile/OutletView";
 import { SalaryCalculator } from "@/features/profile/SalaryCalculator";
 import { HelpView } from "@/features/profile/HelpView";
 import { useUserKey } from "@/context/AuthContext";
+import { useTranslation } from "@/context/LanguageContext";
 
 const PHOTO_KEY_BASE = "warkahbiz_profile_photo";
 const EMAIL_KEY_BASE = "warkahbiz_profile_email";
@@ -64,6 +67,7 @@ export const ProfileView = ({
   outlet: OutletSettings;
   onSaveOutlet: (s: OutletSettings) => void;
 }) => {
+  const { t } = useTranslation();
   const PHOTO_KEY = useUserKey(PHOTO_KEY_BASE);
   const EMAIL_KEY = useUserKey(EMAIL_KEY_BASE);
   const BIZ_CAT_KEY = useUserKey(BIZ_CAT_KEY_BASE);
@@ -106,7 +110,7 @@ export const ProfileView = ({
     setPhone(safeGet(PHONE_KEY));
   }, [PHOTO_KEY, EMAIL_KEY, BIZ_CAT_KEY, PHONE_KEY]);
 
-  const comingSoon = () => toast("Segera hadir 🔜");
+  const comingSoon = () => toast(t("pv_comingSoon"));
 
   if (sub === "myproducts") {
     return (
@@ -184,7 +188,7 @@ export const ProfileView = ({
         <button
           onClick={() => setEditOpen(true)}
           className="relative w-24 h-24 rounded-3xl overflow-hidden bg-surface border-2 border-border grid place-items-center tap shrink-0"
-          aria-label="Tukar gambar"
+          aria-label={t("pv_changePhoto")}
         >
           {photo ? (
             <img src={photo} alt="Profile" className="w-full h-full object-cover" />
@@ -197,8 +201,8 @@ export const ProfileView = ({
         </button>
 
         <div className="flex-1 min-w-0">
-          <div className="text-lg font-extrabold leading-tight truncate">{name || "Nama Anda"}</div>
-          <div className="text-xs text-muted-foreground truncate mt-0.5">{email || "email@anda.com"}</div>
+          <div className="text-lg font-extrabold leading-tight truncate">{name || t("pv_yourName")}</div>
+          <div className="text-xs text-muted-foreground truncate mt-0.5">{email || t("pv_yourEmail")}</div>
           <div className="text-xs text-muted-foreground truncate mt-1">
             {bizName ? `${bizName} • ` : ""}{bizCat}
           </div>
@@ -206,28 +210,28 @@ export const ProfileView = ({
             onClick={() => setEditOpen(true)}
             className="mt-2 h-9 px-4 rounded-2xl bg-gradient-profit text-profit-foreground text-xs font-bold tap shadow-card"
           >
-            Edit Profil
+            {t("editProfile")}
           </button>
         </div>
       </div>
 
       {/* Menu cards row 1 */}
       <div className="grid grid-cols-3 gap-3">
-        <MenuCard data-tutorial="menu-products" icon={<UtensilsCrossed className="w-5 h-5" />} label="Produk Saya" onClick={() => setSub("myproducts")} />
-        <MenuCard icon={<Store className="w-5 h-5" />} label="Outlet Saya" onClick={() => setSub("outlet")} />
-        <MenuCard icon={<Clock className="w-5 h-5" />} label="Waktu Operasi" onClick={() => setSub("hours")} />
+        <MenuCard data-tutorial="menu-products" icon={<UtensilsCrossed className="w-5 h-5" />} label={t("myProducts")} onClick={() => setSub("myproducts")} />
+        <MenuCard icon={<Store className="w-5 h-5" />} label={t("pv_myOutlet")} onClick={() => setSub("outlet")} />
+        <MenuCard icon={<Clock className="w-5 h-5" />} label={t("businessHoursTitle")} onClick={() => setSub("hours")} />
       </div>
 
       {/* Menu cards row 2 */}
       <div className="grid grid-cols-3 gap-3">
-        <MenuCard icon={<Wallet className="w-5 h-5" />} label="Wallet Saya" onClick={() => setSub("wallet")} />
-        <MenuCard icon={<Calculator className="w-5 h-5" />} label="Kalkulator Gaji" onClick={() => setSub("salary")} />
-        <MenuCard icon={<Truck className="w-5 h-5" />} label="Pembekal Saya" onClick={() => setSub("suppliers")} />
+        <MenuCard icon={<Wallet className="w-5 h-5" />} label={t("pv_myWallet")} onClick={() => setSub("wallet")} />
+        <MenuCard icon={<Calculator className="w-5 h-5" />} label={t("pv_salaryCalc")} onClick={() => setSub("salary")} />
+        <MenuCard icon={<Truck className="w-5 h-5" />} label={t("pv_mySuppliers")} onClick={() => setSub("suppliers")} />
       </div>
 
       {/* Help */}
       <button onClick={() => setSub("help")} className="w-full h-12 rounded-2xl bg-surface border border-border flex items-center justify-center gap-2 tap text-sm font-bold">
-        <HelpCircle className="w-4 h-4" /> Bantuan
+        <HelpCircle className="w-4 h-4" /> {t("pv_help")}
       </button>
 
       {editOpen && (
@@ -276,6 +280,7 @@ const EditProfileSheet = ({
   onClose: () => void;
   onSave: (d: { photo: string; name: string; email: string; bizName: string; bizCat: string; phone: string }) => void;
 }) => {
+  const { t } = useTranslation();
   const [photo, setPhoto] = useState(initPhoto);
   const [name, setName] = useState(initName);
   const [email, setEmail] = useState(initEmail);
@@ -288,7 +293,7 @@ const EditProfileSheet = ({
     const f = e.target.files?.[0];
     if (!f) return;
     if (f.size > 3 * 1024 * 1024) {
-      toast.error("Saiz gambar terlalu besar (maks 3MB)");
+      toast.error(t("pv_photoTooBig"));
       return;
     }
     const reader = new FileReader();
@@ -306,7 +311,7 @@ const EditProfileSheet = ({
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPhotoPick} />
 
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-extrabold">Edit Profil</h2>
+          <h2 className="text-lg font-extrabold">{t("editProfile")}</h2>
           <button onClick={onClose} className="w-9 h-9 rounded-full bg-background border border-border grid place-items-center tap">
             <X className="w-4 h-4" />
           </button>
@@ -327,40 +332,40 @@ const EditProfileSheet = ({
             </div>
           </button>
           <button onClick={() => fileRef.current?.click()} className="text-xs font-bold text-primary tap">
-            Tukar gambar
+            {t("pv_changePhoto")}
           </button>
         </div>
 
         <div className="space-y-3">
-          <Field label="Nama">
+          <Field label={t("profileName")}>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={80}
-              placeholder="Cth: Aisyah Binti Ali"
+              placeholder={t("pv_namePh")}
               className="w-full h-12 px-4 rounded-2xl bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </Field>
-          <Field label="Email">
+          <Field label={t("emailLabel")}>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               maxLength={120}
-              placeholder="anda@email.com"
+              placeholder={t("pv_emailPh")}
               className="w-full h-12 px-4 rounded-2xl bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </Field>
-          <Field label="Nama Perniagaan">
+          <Field label={t("profileBusiness")}>
             <input
               value={bizName}
               onChange={(e) => setBizName(e.target.value)}
               maxLength={80}
-              placeholder="Cth: Warung Kak Ros"
+              placeholder={t("pv_bizNamePh")}
               className="w-full h-12 px-4 rounded-2xl bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </Field>
-          <Field label="Kategori">
+          <Field label={t("pv_category")}>
             <div className="relative">
               <select
                 value={bizCat}
@@ -372,23 +377,23 @@ const EditProfileSheet = ({
               <ChevronDown className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" />
             </div>
           </Field>
-          <Field label="No. Telefon">
+          <Field label={t("phoneLabel")}>
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value.replace(/[^0-9+\-\s]/g, "").slice(0, 20))}
-              placeholder="012-3456789"
+              placeholder={t("pv_phonePh")}
               className="w-full h-12 px-4 rounded-2xl bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </Field>
 
           <button
             onClick={() => {
-              if (!name.trim()) { toast.error("Sila isi nama"); return; }
+              if (!name.trim()) { toast.error(t("pv_pleaseEnterName")); return; }
               onSave({ photo, name: name.trim(), email: email.trim(), bizName: bizName.trim(), bizCat, phone: phone.trim() });
             }}
             className="w-full h-12 rounded-2xl bg-gradient-profit text-profit-foreground font-bold tap mt-3 shadow-card"
           >
-            Simpan
+            {t("saveBtn")}
           </button>
         </div>
       </div>
