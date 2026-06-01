@@ -6,6 +6,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { Txn, OpExEntry, PettyEntry, OpExCategory } from "@/types";
 import { fmt } from "@/lib/format";
+import { useTranslation } from "@/context/LanguageContext";
 
 interface Props {
   onClose: () => void;
@@ -127,6 +128,7 @@ const refNo = () => {
 };
 
 export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, businessName }: Props) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>("menu");
   const [period, setPeriod] = useState<PeriodKey>("30d");
   const [customFrom, setCustomFrom] = useState("");
@@ -137,7 +139,7 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
   const range = useMemo(() => computeRange(period, customFrom, customTo), [period, customFrom, customTo]);
   const report = useMemo(() => buildReport(txns, opex, petty, range.start, range.end), [txns, opex, petty, range]);
   const periodLabel = `${longDate(range.start)} — ${longDate(range.end)}`;
-  const businessLabel = businessName?.trim() || "Perniagaan Anda";
+  const businessLabel = businessName?.trim() || t("pnl_yourBusiness");
   const isEmpty = report.txnsInPeriod.length === 0 && report.opexInPeriod.length === 0;
 
   const monthlyBreakdown = useMemo(() => {
@@ -246,10 +248,10 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
       }
 
       XLSX.writeFile(wb, `WarkahBiz_PnL_${reportRef}.xlsx`);
-      toast.success("Laporan Excel berjaya dimuat turun!");
+      toast.success(t("pnl_excelSuccess"));
     } catch (err) {
       console.error(err);
-      toast.error("Gagal export Excel.");
+      toast.error(t("pnl_excelError"));
     } finally {
       setLoading(false);
     }
@@ -389,10 +391,10 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
       }
 
       doc.save(`WarkahBiz_PnL_${reportRef}.pdf`);
-      toast.success("Laporan PDF berjaya dimuat turun!");
+      toast.success(t("pnl_pdfSuccess"));
     } catch (err) {
       console.error(err);
-      toast.error("Gagal export PDF.");
+      toast.error(t("pnl_pdfError"));
     } finally {
       setLoading(false);
     }
@@ -410,7 +412,7 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
               </button>
             )}
             <h3 className="font-extrabold text-lg">
-              {step === "menu" ? "Export Laporan 📑" : step === "period" ? "Pilih Tempoh" : "Pratonton Laporan"}
+              {step === "menu" ? t("pnl_exportReport") : step === "period" ? t("pnl_choosePeriod") : t("pnl_previewReport")}
             </h3>
           </div>
           <button onClick={onClose} className="w-8 h-8 grid place-items-center rounded-full bg-surface-elevated tap">
@@ -426,8 +428,8 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
             >
               <FileText className="w-5 h-5" />
               <div className="flex-1 text-left">
-                <div className="font-bold">Laporan Untung Rugi (P&L)</div>
-                <div className="text-[11px] opacity-80">Ringkasan kewangan profesional</div>
+                <div className="font-bold">{t("pnl_plReport")}</div>
+                <div className="text-[11px] opacity-80">{t("pnl_plReportDesc")}</div>
               </div>
             </button>
             <button
@@ -436,8 +438,8 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
             >
               <FileSpreadsheet className="w-5 h-5" />
               <div className="flex-1 text-left">
-                <div className="font-bold">Rekod Transaksi Penuh</div>
-                <div className="text-[11px] text-muted-foreground">Semua transaksi mentah</div>
+                <div className="font-bold">{t("pnl_fullTxnRecord")}</div>
+                <div className="text-[11px] text-muted-foreground">{t("pnl_fullTxnRecordDesc")}</div>
               </div>
             </button>
           </div>
@@ -446,13 +448,13 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
         {step === "period" && (
           <div className="space-y-2">
             {([
-              { k: "today", label: "Hari Ini" },
-              { k: "7d", label: "7 Hari" },
-              { k: "30d", label: "30 Hari" },
-              { k: "month", label: "Bulan Ini" },
-              { k: "3m", label: "3 Bulan" },
-              { k: "1y", label: "Setahun" },
-              { k: "custom", label: "Pilih Tarikh" },
+              { k: "today", label: t("periodToday") },
+              { k: "7d", label: t("periodWeek") },
+              { k: "30d", label: t("pnl_period30d") },
+              { k: "month", label: t("periodMonth") },
+              { k: "3m", label: t("period3Months") },
+              { k: "1y", label: t("pnl_period1y") },
+              { k: "custom", label: t("pnl_periodCustom") },
             ] as const).map(p => (
               <button
                 key={p.k}
@@ -466,11 +468,11 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
             {period === "custom" && (
               <div className="grid grid-cols-2 gap-2 pt-2">
                 <label className="text-xs">
-                  <span className="text-muted-foreground">Dari</span>
+                  <span className="text-muted-foreground">{t("pnl_from")}</span>
                   <input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} className="w-full mt-1 h-10 rounded-lg bg-surface-elevated px-2 text-sm" />
                 </label>
                 <label className="text-xs">
-                  <span className="text-muted-foreground">Hingga</span>
+                  <span className="text-muted-foreground">{t("pnl_to")}</span>
                   <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} className="w-full mt-1 h-10 rounded-lg bg-surface-elevated px-2 text-sm" />
                 </label>
               </div>
@@ -479,7 +481,7 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
               onClick={() => setStep("preview")}
               className="w-full h-12 mt-2 rounded-xl bg-gradient-profit text-profit-foreground font-bold tap"
             >
-              Jana Pratonton →
+              {t("pnl_generatePreview")}
             </button>
           </div>
         )}
@@ -491,60 +493,60 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
             {isEmpty ? (
               <div className="rounded-2xl p-6 bg-surface-elevated text-center">
                 <div className="text-4xl mb-2">📭</div>
-                <div className="font-bold mb-1">Tiada rekod untuk tempoh ini.</div>
-                <div className="text-xs text-muted-foreground">Mula rekod transaksi anda di Rekod Kewangan.</div>
+                <div className="font-bold mb-1">{t("pnl_noRecords")}</div>
+                <div className="text-xs text-muted-foreground">{t("pnl_noRecordsHint")}</div>
               </div>
             ) : (
               <>
                 <div className={`rounded-2xl p-5 text-center ${report.netProfit >= 0 ? "bg-profit/10" : "bg-cost/10"}`}>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Untung Bersih</div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("pnl_netProfit")}</div>
                   <div className={`text-4xl font-extrabold mt-2 tabular-nums ${report.netProfit >= 0 ? "text-profit" : "text-cost"}`}>
                     {rm(report.netProfit)}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">Margin {report.netMargin.toFixed(1)}%</div>
+                  <div className="text-xs text-muted-foreground mt-1">{t("pnl_margin")} {report.netMargin.toFixed(1)}%</div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <SummaryBox label="Pendapatan" value={rm(report.totalRevenue)} tone="profit" />
-                  <SummaryBox label="Perbelanjaan" value={rm(report.totalCogs + report.totalOpex)} tone="cost" />
-                  <SummaryBox label="Untung Kasar" value={rm(report.grossProfit)} tone="profit" />
-                  <SummaryBox label="Margin Kasar" value={`${report.grossMargin.toFixed(1)}%`} tone="info" />
+                  <SummaryBox label={t("pnl_revenue")} value={rm(report.totalRevenue)} tone="profit" />
+                  <SummaryBox label={t("pnl_expenses")} value={rm(report.totalCogs + report.totalOpex)} tone="cost" />
+                  <SummaryBox label={t("pnl_grossProfit")} value={rm(report.grossProfit)} tone="profit" />
+                  <SummaryBox label={t("pnl_grossMargin")} value={`${report.grossMargin.toFixed(1)}%`} tone="info" />
                 </div>
 
-                <Section title="A. Pendapatan">
-                  <Row label="Jualan Produk" value={rm(report.jualanProduk)} positive />
-                  <Row label="Pendapatan Lain" value={rm(report.pendapatanLain)} positive />
-                  <Row label="JUMLAH PENDAPATAN" value={rm(report.totalRevenue)} positive bold />
+                <Section title={t("pnl_sectionRevenue")}>
+                  <Row label={t("pnl_salesProduct")} value={rm(report.jualanProduk)} positive />
+                  <Row label={t("pnl_otherIncome")} value={rm(report.pendapatanLain)} positive />
+                  <Row label={t("pnl_totalRevenue")} value={rm(report.totalRevenue)} positive bold />
                 </Section>
 
-                <Section title="B. Kos Barang Dijual (COGS)">
-                  <Row label="Kos Bahan-Bahan" value={rm(report.kosBahan)} negative />
-                  <Row label="Kos Pembungkusan" value={rm(report.kosPembungkusan)} negative />
-                  <Row label="Kos Bekalan Lain" value={rm(report.kosBekalanLain)} negative />
-                  <Row label="JUMLAH COGS" value={rm(report.totalCogs)} negative bold />
-                  <Row label="UNTUNG KASAR" value={rm(report.grossProfit)} positive bold />
-                  <Row label={`Margin Untung Kasar`} value={`${report.grossMargin.toFixed(2)}%`} />
+                <Section title={t("pnl_sectionCogs")}>
+                  <Row label={t("pnl_rawMaterials")} value={rm(report.kosBahan)} negative />
+                  <Row label={t("pnl_packagingCost")} value={rm(report.kosPembungkusan)} negative />
+                  <Row label={t("pnl_otherSupplies")} value={rm(report.kosBekalanLain)} negative />
+                  <Row label={t("pnl_totalCogs")} value={rm(report.totalCogs)} negative bold />
+                  <Row label={t("pnl_grossProfitLabel")} value={rm(report.grossProfit)} positive bold />
+                  <Row label={t("pnl_grossMarginLabel")} value={`${report.grossMargin.toFixed(2)}%`} />
                 </Section>
 
-                <Section title="C. Perbelanjaan Operasi">
-                  <Row label="Utiliti" value={rm(report.opexBreakdown["Utiliti"])} negative />
-                  <Row label="Sewa Tapak" value={rm(report.opexBreakdown["Sewa Tapak"])} negative />
-                  <Row label="Gaji & Upah" value={rm(report.opexBreakdown["Gaji"])} negative />
-                  <Row label="Pengangkutan" value={rm(report.opexBreakdown["Pengangkutan"])} negative />
-                  <Row label="Lesen & Permit" value={rm(report.opexBreakdown["Lesen"])} negative />
-                  <Row label="Lain-lain" value={rm(report.opexBreakdown["Lain-lain"])} negative />
-                  <Row label="JUMLAH PERBELANJAAN OPERASI" value={rm(report.totalOpex)} negative bold />
+                <Section title={t("pnl_sectionOpex")}>
+                  <Row label={t("pnl_utility")} value={rm(report.opexBreakdown["Utiliti"])} negative />
+                  <Row label={t("pnl_rent")} value={rm(report.opexBreakdown["Sewa Tapak"])} negative />
+                  <Row label={t("pnl_salary")} value={rm(report.opexBreakdown["Gaji"])} negative />
+                  <Row label={t("pnl_transport")} value={rm(report.opexBreakdown["Pengangkutan"])} negative />
+                  <Row label={t("pnl_license")} value={rm(report.opexBreakdown["Lesen"])} negative />
+                  <Row label={t("pnl_others")} value={rm(report.opexBreakdown["Lain-lain"])} negative />
+                  <Row label={t("pnl_totalOpex")} value={rm(report.totalOpex)} negative bold />
                 </Section>
 
-                <Section title="D. Keuntungan Bersih">
-                  <Row label="UNTUNG BERSIH SEBELUM CUKAI" value={rm(report.netProfit)} positive={report.netProfit >= 0} negative={report.netProfit < 0} bold />
-                  <Row label="Margin Untung Bersih" value={`${report.netMargin.toFixed(2)}%`} />
+                <Section title={t("pnl_sectionNetProfit")}>
+                  <Row label={t("pnl_netProfitBeforeTax")} value={rm(report.netProfit)} positive={report.netProfit >= 0} negative={report.netProfit < 0} bold />
+                  <Row label={t("pnl_netMarginLabel")} value={`${report.netMargin.toFixed(2)}%`} />
                 </Section>
 
-                <Section title="E. Petty Cash">
-                  <Row label="Baki Awal" value={rm(report.pettyOpening)} />
-                  <Row label="Jumlah Digunakan" value={rm(report.pettyUsed)} negative />
-                  <Row label="Baki Akhir" value={rm(report.pettyClosing)} bold />
+                <Section title={t("pnl_sectionPettyCash")}>
+                  <Row label={t("pnl_openingBalance")} value={rm(report.pettyOpening)} />
+                  <Row label={t("pnl_amountUsed")} value={rm(report.pettyUsed)} negative />
+                  <Row label={t("pnl_closingBalance")} value={rm(report.pettyClosing)} bold />
                 </Section>
               </>
             )}
@@ -553,11 +555,11 @@ export const PnLReportSheet = ({ onClose, onOpenFullExport, txns, opex, petty, b
               <div className="grid grid-cols-2 gap-2 pt-2">
                 <button onClick={handlePdf} disabled={loading} className="h-12 rounded-xl bg-primary text-primary-foreground font-bold tap flex items-center justify-center gap-2 disabled:opacity-60">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
-                  Muat Turun PDF
+                  {t("pnl_downloadPdf")}
                 </button>
                 <button onClick={handleExcel} disabled={loading} className="h-12 rounded-xl bg-gradient-profit text-profit-foreground font-bold tap flex items-center justify-center gap-2 disabled:opacity-60">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />}
-                  Muat Turun Excel
+                  {t("pnl_downloadExcel")}
                 </button>
               </div>
             )}
