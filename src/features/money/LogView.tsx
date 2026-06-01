@@ -404,8 +404,8 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
                               {expanded ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
                               <span className="text-xl">🧑</span>
                               <div className="flex-1">
-                                <div className="text-sm font-semibold">Peribadi</div>
-                                <div className="text-[11px] text-muted-foreground">{group.peribadi.length} item · tidak dikira dalam untung</div>
+                                <div className="text-sm font-semibold">{t("lv_peribadi")}</div>
+                                <div className="text-[11px] text-muted-foreground">{group.peribadi.length} item · {t("lv_peribadiSubtitle")}</div>
                               </div>
                               <div className="font-bold text-sm text-muted-foreground">−{fmt(peribadiTotal)}</div>
                             </button>
@@ -444,8 +444,8 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
               >
                 <div className="w-9 h-9 rounded-full bg-primary/15 grid place-items-center text-sm font-extrabold text-primary">1</div>
                 <div className="flex-1">
-                  <div className="font-bold text-sm">Tetapkan had bulanan</div>
-                  <div className="text-[11px] text-muted-foreground">Kawal perbelanjaan setiap bulan</div>
+                  <div className="font-bold text-sm">{t("lv_pettySetLimit")}</div>
+                  <div className="text-[11px] text-muted-foreground">{t("lv_pettySetLimitDesc")}</div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </button>
@@ -455,8 +455,8 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
               >
                 <div className="w-9 h-9 rounded-full bg-profit/15 grid place-items-center text-sm font-extrabold text-profit">2</div>
                 <div className="flex-1">
-                  <div className="font-bold text-sm">Masuk wang untuk mula</div>
-                  <div className="text-[11px] text-muted-foreground">Top-up baki petty cash</div>
+                  <div className="font-bold text-sm">{t("lv_pettyTopUpStart")}</div>
+                  <div className="text-[11px] text-muted-foreground">{t("lv_pettyTopUpStartDesc")}</div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </button>
@@ -500,15 +500,15 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
               </div>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div>
-                  <div className="text-muted-foreground">Diperuntukkan</div>
+                  <div className="text-muted-foreground">{t("lv_pettyAllocated")}</div>
                   <div className="font-extrabold text-base">RM {pettyMonthlyLimit.toFixed(2)}</div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">Digunakan</div>
+                  <div className="text-muted-foreground">{t("lv_pettyUsed")}</div>
                   <div className="font-extrabold text-base text-cost">RM {pettyUsedThisMonth.toFixed(2)}</div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">Baki</div>
+                  <div className="text-muted-foreground">{t("lv_pettyBalance")}</div>
                   <div className="font-extrabold text-base text-profit">RM {pettyLimitRemaining.toFixed(2)}</div>
                 </div>
               </div>
@@ -531,7 +531,7 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
                 disabled={topUpDisabled}
                 className={`w-full h-11 rounded-2xl bg-gradient-profit text-profit-foreground font-bold tap text-sm ${topUpDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                Top-up Sekarang
+                {t("lv_pettyTopUpNow")}
               </button>
             </div>
           )}
@@ -601,10 +601,10 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
                     {w.isCurrent && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-warn/20 text-warn">{t("lv_currentPeriod")}</span>}
                   </div>
                   <div className="space-y-1 text-sm">
-                    <div className="flex justify-between"><span className="text-muted-foreground">Jualan</span><span className="font-bold text-profit">+{fmt(w.sales)}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">COGS</span><span className="font-bold text-cost">−{fmt(w.cogs)}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">{t("lv_sales")}</span><span className="font-bold text-profit">+{fmt(w.sales)}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">{t("lv_cogs")}</span><span className="font-bold text-cost">−{fmt(w.cogs)}</span></div>
                     <div className="border-t border-border pt-2 flex justify-between text-base">
-                      <span className="font-extrabold">Untung Kasar</span>
+                      <span className="font-extrabold">{t("lv_grossProfit")}</span>
                       <span className={`font-extrabold ${profit >= 0 ? "text-profit" : "text-cost"}`}>{fmt(profit)}</span>
                     </div>
                   </div>
@@ -629,12 +629,12 @@ export const LogView = ({ txns, today, week, month, petty, opex, todayCogs, toda
                     {m.isCurrent && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-warn/20 text-warn">{t("lv_currentPeriod")}</span>}
                   </div>
                   <div className="space-y-1 text-sm">
-                    <div className="flex justify-between"><span>💰 Jualan</span><span className="font-bold text-profit">+{fmt(m.sales)}</span></div>
-                    <div className="border-t border-border pt-1.5 flex justify-between"><span className="text-muted-foreground">🛒 COGS</span><span className="font-bold text-cost">−{fmt(m.cogs)}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">💼 Kos Operasi</span><span className="font-bold text-cost">−{fmt(m.opex)}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">🪙 Perbelanjaan Lain</span><span className="font-bold text-cost">−{fmt(m.petty)}</span></div>
+                    <div className="flex justify-between"><span>💰 {t("lv_sales")}</span><span className="font-bold text-profit">+{fmt(m.sales)}</span></div>
+                    <div className="border-t border-border pt-1.5 flex justify-between"><span className="text-muted-foreground">🛒 {t("lv_cogs")}</span><span className="font-bold text-cost">−{fmt(m.cogs)}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">💼 {t("lv_rowOpex")}</span><span className="font-bold text-cost">−{fmt(m.opex)}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">🪙 {t("lv_rowOtherExpenses")}</span><span className="font-bold text-cost">−{fmt(m.petty)}</span></div>
                     <div className="border-t border-border pt-2 flex justify-between text-base">
-                      <span className="font-extrabold">✅ Untung Bersih</span>
+                      <span className="font-extrabold">✅ {t("lv_netProfit")}</span>
                       <span className={`font-extrabold ${profit >= 0 ? "text-profit" : "text-cost"}`}>{fmt(profit)}</span>
                     </div>
                   </div>
